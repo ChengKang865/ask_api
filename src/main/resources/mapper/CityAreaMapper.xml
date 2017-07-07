@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.CityAreaMapper">
+    <select id="getStreets" parameterType="map" resultType="String">
+    select c4.area_name
+    from  city_area c1
+    LEFT JOIN city_area c2 on c1.id = c2.parent_id
+    LEFT JOIN city_area c3 on c2.id = c3.parent_id
+    LEFT JOIN city_area c4 on c3.id=c4.parent_id
+    where c1.area_name = #{param1} and c2.area_name = #{param2} and c3.area_name = #{param3} order by c4.id;
+  </select>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.autoask.mapper.OrderGoodsMapper">
+    <resultMap id="order_goods_map" type="com.autoask.entity.mysql.OrderGoods">
+        <result column="_order_goods_id" jdbcType="BIGINT" property="id"/>
+        <result column="_order_goods_order_goods_id" jdbcType="VARCHAR" property="orderGoodsId"/>
+        <result column="_order_goods_order_id" jdbcType="VARCHAR" property="orderId"/>
+        <result column="_order_goods_goods_snapshot_id" jdbcType="VARCHAR" property="goodsSnapshotId"/>
+        <result column="_order_goods_num" jdbcType="INTEGER" property="num"/>
+        <result column="_order_goods_snapshot_price" jdbcType="DECIMAL" property="snapshotPrice"/>
+        <result column="_order_goods_discount_price" jdbcType="DECIMAL" property="discountPrice"/>
+        <result column="_order_goods_pay_price" jdbcType="DECIMAL" property="payPrice"/>
+        <association property="orderGoodsShare"
+                     resultMap="com.autoask.mapper.OrderGoodsShareMapper.order_goods_share_map"/>
+        <association property="goodsSnapshot" resultMap="com.autoask.mapper.GoodsSnapshotMapper.goods_snapshot_map"/>
+        <collection property="orderGoodsCardList" ofType="OrderGoodsCard"
+                    resultMap="com.autoask.mapper.OrderGoodsCardMapper.order_goods_card_map"/>
+    </resultMap>
+
+    <sql id="order_goods_fields">
+        order_goods.id as _order_goods_id, order_goods.order_goods_id as _order_goods_order_goods_id, order_goods.order_id as _order_goods_order_id, order_goods.goods_snapshot_id as _order_goods_goods_snapshot_id, order_goods.num as _order_goods_num, order_goods.snapshot_price as _order_goods_snapshot_price, order_goods.discount_price as _order_goods_discount_price, order_goods.pay_price as _order_goods_pay_price
+    </sql>
+
+</mapper>

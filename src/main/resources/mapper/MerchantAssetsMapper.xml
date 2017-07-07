@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.MerchantAssetsMapper">
+    <resultMap id="merchant_assets_map" type="com.autoask.entity.mysql.MerchantAssets">
+        <result column="_merchant_assets_id" jdbcType="BIGINT" property="id"/>
+        <result column="_merchant_assets_merchant_type" jdbcType="VARCHAR" property="merchantType"/>
+        <result column="_merchant_assets_merchant_id" jdbcType="VARCHAR" property="merchantId"/>
+        <result column="_merchant_assets_balance" jdbcType="DECIMAL" property="balance"/>
+        <result column="_merchant_assets_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_merchant_assets_modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="_merchant_assets_version" jdbcType="BIGINT" property="version"/>
+        <result column="_merchant_assets_income_amount" jdbcType="DECIMAL" property="incomeAmount"/>
+    </resultMap>
+
+    <sql id="merchant_assets_fields">
+        merchant_assets.id as _merchant_assets_id, merchant_assets.merchant_type as _merchant_assets_merchant_type, merchant_assets.merchant_id as _merchant_assets_merchant_id, merchant_assets.balance as _merchant_assets_balance, merchant_assets.create_time as _merchant_assets_create_time, merchant_assets.modify_time as _merchant_assets_modify_time, merchant_assets.version as _merchant_assets_version, merchant_assets.income_amount as _merchant_assets_income_amount
+    </sql>
+
+
+    <select id="selectForLock" resultMap="merchant_assets_map">
+        SELECT
+        <include refid="merchant_assets_fields"></include>
+        FROM merchant_assets
+        WHERE merchant_type = #{merchantType} AND merchant_id = #{merchantId}
+        FOR UPDATE
+    </select>
+
+    <update id="updateBalance">
+       UPDATE merchant_assets SET balance = balance + #{changeAmount} ,
+       modify_time = current_timestamp,
+       version = version + 1
+       WHERE merchant_type = #{merchantType} and merchant_id = #{merchantId};
+    </update>
+
+
+    <update id="incomeBalance">
+       UPDATE merchant_assets SET balance = balance + #{changeAmount} ,
+       income_amount = income_amount + #{changeAmount},
+       modify_time = current_timestamp,
+       version = version + 1
+       WHERE merchant_type = #{merchantType} and merchant_id = #{merchantId};
+    </update>
+
+
+    <select id="selectByParam" resultMap="merchant_assets_map">
+        SELECT
+        <include refid="merchant_assets_fields"></include>
+        FROM merchant_assets
+        <where>
+            merchant_assets.id > #{startId}
+            <if test="merchantType != null">
+                AND merchant_type = #{merchantType}
+            </if>
+            <if test="balance != null">
+                AND balance >= #{balance}
+            </if>
+        </where>
+        limit #{limit}
+    </select>
+
+    <select id="countMerchantAssetsList" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM merchant_assets
+        <where>
+            <if test="merchantType != null and merchantType !=''">
+                merchant_type = #{merchantType}
+            </if>
+            <if test="merchantIds != null and merchantIds.size > 0">
+                AND merchant_id IN
+                <foreach item="item" index="index" collection="merchantIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getMerchantAssetsList" resultMap="merchant_assets_map">
+        SELECT
+        <include refid="merchant_assets_fields"></include>
+        FROM merchant_assets
+        <where>
+            <if test="merchantType != null and merchantType !=''">
+                merchant_type = #{merchantType}
+            </if>
+            <if test="merchantIds != null and merchantIds.size > 0">
+                AND merchant_id IN
+                <foreach item="item" index="index" collection="merchantIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY create_time DESC
+        LIMIT #{start},#{limit}
+    </select>
+</mapper>

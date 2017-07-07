@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.autoask.mapper.WeiXinQrcodeInfoMapper">
+	<resultMap id="BaseResultMap" type="com.autoask.entity.mysql.WeiXinQrcodeInfo">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="qr_code_info_id" property="qrCodeInfoId"
+			jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="VARCHAR" />
+		<result column="expire_seconds" property="expireSeconds"
+			jdbcType="BIGINT" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="url" property="url" jdbcType="VARCHAR" />
+		<result column="subscribe_count" property="subscribeCount"
+			jdbcType="INTEGER" />
+		<result column="qr_create_time" property="qrCreateTime"
+			jdbcType="BIGINT" />
+		<result column="delete_flag" property="deleteFlag" jdbcType="BOOLEAN" />
+		<result column="ticket" property="ticket" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, name, qr_code_info_id, type, expire_seconds, create_date, url,
+		subscribe_count,
+		qr_create_time, delete_flag,ticket
+	</sql>
+	<!-- list分页number -->
+	<select id="selectWeiXinQrcodeInfoNum" resultType="java.lang.Long">
+		SELECT count(qr_code_info_id)
+		FROM
+		wei_xin_qrcode_info where delete_flag = 0
+		<if test="name != null and name !=''">
+			AND name LIKE CONCAT('%','${name}','%' )
+		</if>
+	</select>
+
+	<!-- list数据 -->
+	<select id="selectWeiXinQrcodeInfoList" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM wei_xin_qrcode_info where 1=1
+		<if test="name != null and name != ''">
+			AND name LIKE CONCAT('%','${name}','%' )
+		</if>
+		AND delete_flag = 0
+		order by create_date desc limit #{start},#{limit};
+	</select>
+
+	<!-- 查询订阅总次数 -->
+	<select id="countSubscribeCount" resultType="java.lang.Long">
+		SELECT COALESCE(SUM(subscribe_count),0)
+		FROM
+		wei_xin_qrcode_info where delete_flag=0;
+	</select>
+	
+		<!-- 查询最大临时二维码 -->
+	<select id="selectMaxSceheId" resultType="java.lang.Long">
+		select COALESCE(MAX(substring(qr_code_info_id,9)),0)+1  from wei_xin_qrcode_info where type = 'QR_SCENE' AND delete_flag = 0
+	</select>
+	
+
+	<!-- 根据id获取数据 -->
+	<select id="selectWeiXinQrcodeInfoById" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM wei_xin_qrcode_info where  delete_flag = 0 AND qr_code_info_id = #{qrCodeInfoId};
+	</select>
+	
+	<!-- 根据id订阅加1 -->
+	<update id="updateSubscribeCountAddOne">
+		UPDATE wei_xin_qrcode_info
+		SET subscribe_count = subscribe_count+1
+		WHERE qr_code_info_id = #{qrCodeInfoId}
+	</update>
+
+</mapper>

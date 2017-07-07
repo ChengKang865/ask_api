@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.GoodsSnapshotInfoMapper">
+    <resultMap id="goods_snapshot_info_map" type="com.autoask.entity.mysql.GoodsSnapshotInfo">
+        <result column="_goods_snapshot_info_id" jdbcType="BIGINT" property="id"/>
+        <result column="_goods_snapshot_info_goods_snapshot_id" jdbcType="VARCHAR" property="goodsSnapshotId"/>
+        <result column="_goods_snapshot_info_key_name" jdbcType="VARCHAR" property="keyName"/>
+        <result column="_goods_snapshot_info_value" jdbcType="VARCHAR" property="value"/>
+        <result column="goods_snapshot_info_id" jdbcType="VARCHAR" property="goodsSnapshotInfoId"/>
+    </resultMap>
+    <sql id="goods_snapshot_info_fields">
+        goods_snapshot_info.id as _goods_snapshot_info_id, goods_snapshot_info.goods_snapshot_id as
+        _goods_snapshot_info_goods_snapshot_id, goods_snapshot_info.key_name as _goods_snapshot_info_key_name,
+        goods_snapshot_info.value as _goods_snapshot_info_value, goods_snapshot_info_id
+    </sql>
+</mapper>

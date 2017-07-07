@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.CarModelDetailMapper">
+    <resultMap id="BaseResultMap" type="com.autoask.entity.mysql.CarModelDetail">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="source_id" jdbcType="INTEGER" property="sourceId"/>
+        <result column="checker_runtime_id" jdbcType="INTEGER" property="checkerRuntimeId"/>
+        <result column="old_dmodel" jdbcType="VARCHAR" property="oldDmodel"/>
+        <result column="detail_model" jdbcType="VARCHAR" property="detailModel"/>
+        <result column="detail_model_slug" jdbcType="VARCHAR" property="detailModelSlug"/>
+        <result column="price_bn" jdbcType="DECIMAL" property="priceBn"/>
+        <result column="cont_vprice" jdbcType="DECIMAL" property="contVprice"/>
+        <result column="url" jdbcType="VARCHAR" property="url"/>
+        <result column="global_slug" jdbcType="VARCHAR" property="globalSlug"/>
+        <result column="domain" jdbcType="VARCHAR" property="domain"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="year" jdbcType="INTEGER" property="year"/>
+        <result column="has_param" jdbcType="VARCHAR" property="hasParam"/>
+        <result column="volume" jdbcType="DECIMAL" property="volume"/>
+        <result column="vv" jdbcType="DECIMAL" property="vv"/>
+        <result column="listed_year" jdbcType="INTEGER" property="listedYear"/>
+        <result column="delisted_year" jdbcType="INTEGER" property="delistedYear"/>
+        <result column="control" jdbcType="VARCHAR" property="control"/>
+        <result column="emission_standard" jdbcType="VARCHAR" property="emissionStandard"/>
+        <result column="volume_extend" jdbcType="VARCHAR" property="volumeExtend"/>
+        <result column="simple_model" jdbcType="VARCHAR" property="simpleModel"/>
+        <result column="continuity_id" jdbcType="INTEGER" property="continuityId"/>
+        <result column="body_model" jdbcType="VARCHAR" property="bodyModel"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, source_id, checker_runtime_id, old_dmodel, detail_model, detail_model_slug, price_bn, 
+    cont_vprice, url, global_slug, domain, status, year, has_param, volume, vv, listed_year, 
+    delisted_year, control, emission_standard, volume_extend, simple_model, continuity_id, 
+    body_model
+  </sql>
+    <select id="getYearList" resultType="java.lang.String">
+        SELECT DISTINCT year
+            FROM car_model_detail
+            WHERE global_slug = #{model};
+    </select>
+    <select id="getDetailList" resultType="java.lang.String">
+        SELECT DISTINCT detail_model
+        FROM car_model_detail
+        WHERE global_slug = #{model} AND year = #{year};
+    </select>
+
+
+</mapper>

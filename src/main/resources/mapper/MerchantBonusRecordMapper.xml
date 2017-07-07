@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.MerchantBonusRecordMapper">
+    <resultMap id="merchant_bonus_record_map" type="com.autoask.entity.mysql.MerchantBonusRecord">
+        <result column="_merchant_bonus_record_remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="_merchant_bonus_record_merchant_type" jdbcType="VARCHAR" property="merchantType"/>
+        <result column="_merchant_bonus_record_change_amount" jdbcType="DECIMAL" property="changeAmount"/>
+        <result column="_merchant_bonus_record_now_amount" jdbcType="DECIMAL" property="nowAmount"/>
+        <result column="_merchant_bonus_record_merchant_id" jdbcType="VARCHAR" property="merchantId"/>
+        <result column="_merchant_bonus_record_id" jdbcType="BIGINT" property="id"/>
+        <result column="_merchant_bonus_record_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_merchant_bonus_record_status" jdbcType="VARCHAR" property="status"/>
+        <result column="_merchant_bonus_record_pre_amount" jdbcType="DECIMAL" property="preAmount"/>
+        <result column="_merchant_bonus_record_record_id" jdbcType="VARCHAR" property="recordId"/>
+        <result column="_merchant_bonus_record_update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="_merchant_bonus_record_pingpp_transfer_id" jdbcType="VARCHAR" property="pingppTransferId"/>
+    </resultMap>
+
+    <sql id="merchant_bonus_record_fields">
+        merchant_bonus_record.remark as _merchant_bonus_record_remark, merchant_bonus_record.merchant_type as _merchant_bonus_record_merchant_type,
+        merchant_bonus_record.change_amount as _merchant_bonus_record_change_amount, merchant_bonus_record.now_amount as _merchant_bonus_record_now_amount,
+        merchant_bonus_record.merchant_id as _merchant_bonus_record_merchant_id, merchant_bonus_record.id as _merchant_bonus_record_id,
+        merchant_bonus_record.create_time as _merchant_bonus_record_create_time, merchant_bonus_record.status as _merchant_bonus_record_status,
+        merchant_bonus_record.pre_amount as _merchant_bonus_record_pre_amount, merchant_bonus_record.record_id as _merchant_bonus_record_record_id,
+        merchant_bonus_record.update_time as _merchant_bonus_record_update_time, merchant_bonus_record.pingpp_transfer_id as _merchant_bonus_record_pingpp_transfer_id
+    </sql>
+
+</mapper>

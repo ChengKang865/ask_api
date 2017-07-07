@@ -1,0 +1,864 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.OrderInfoMapper">
+    <resultMap id="order_info_map" type="com.autoask.entity.mysql.OrderInfo">
+        <result column="_order_info_id" jdbcType="BIGINT" property="id"/>
+        <result column="_order_info_order_id" jdbcType="VARCHAR" property="orderId"/>
+        <result column="_order_info_serial" jdbcType="VARCHAR" property="serial"/>
+        <result column="_order_info_user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="_order_info_snapshot_price" jdbcType="DECIMAL" property="snapshotPrice"/>
+        <result column="_order_info_delivery_fee" jdbcType="DECIMAL" property="deliveryFee"/>
+        <result column="_order_info_discount_price" jdbcType="DECIMAL" property="discountPrice"/>
+        <result column="_order_info_pay_price" jdbcType="DECIMAL" property="payPrice"/>
+        <result column="_order_info_serve_type" jdbcType="VARCHAR" property="serveType"/>
+        <result column="_order_info_status" jdbcType="VARCHAR" property="status"/>
+        <result column="_order_info_pay_type" jdbcType="VARCHAR" property="payType"/>
+        <result column="_order_info_pay_serial" jdbcType="VARCHAR" property="paySerial"/>
+        <result column="_order_info_pay_time" jdbcType="TIMESTAMP" property="payTime"/>
+        <result column="_order_info_refund_serial" jdbcType="VARCHAR" property="refundSerial"/>
+        <result column="_order_info_refund_type" jdbcType="VARCHAR" property="refundType"/>
+        <result column="_order_info_refund_id" jdbcType="VARCHAR" property="refundId"/>
+        <result column="_order_info_refund_time" jdbcType="TIMESTAMP" property="refundTime"/>
+        <result column="_order_info_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_order_info_receive_time" jdbcType="TIMESTAMP" property="receiveTime"/>
+        <result column="_order_info_comment_time" jdbcType="TIMESTAMP" property="commentTime"/>
+        <result column="_order_info_user_delete_flag" jdbcType="BOOLEAN" property="userDeleteFlag"/>
+        <result column="_order_info_invoice_id" jdbcType="VARCHAR" property="invoiceId"/>
+        <result column="_order_info_share_status" jdbcType="VARCHAR" property="shareStatus"/>
+        <result column="_order_info_share_time" jdbcType="TIMESTAMP" property="shareTime"/>
+        <result column="_order_info_share_operator_id" jdbcType="VARCHAR" property="shareOperatorId"/>
+        <result column="_order_info_comment_rate" jdbcType="SMALLINT" property="commentRate"/>
+        <result column="_order_info_service_fee" jdbcType="DECIMAL" property="serviceFee"/>
+        <association property="user" resultMap="com.autoask.mapper.UserMapper.user_map"/>
+        <association property="orderShare" resultMap="com.autoask.mapper.OrderShareMapper.order_share_map"/>
+        <association property="orderServe" resultMap="com.autoask.mapper.OrderServeMapper.order_serve_map"/>
+        <association property="orderDelivery" resultMap="com.autoask.mapper.OrderDeliveryMapper.order_delivery_map"/>
+        <association property="orderAppointValidate"
+                     resultMap="com.autoask.mapper.OrderAppointValidateMapper.order_appoint_validate_map"/>
+        <collection property="orderGoodsList" ofType="com.autoask.entity.mysql.OrderGoods"
+                    resultMap="com.autoask.mapper.OrderGoodsMapper.order_goods_map"/>
+    </resultMap>
+
+    <sql id="order_info_fields">
+        order_info.id as _order_info_id, order_info.order_id as _order_info_order_id, order_info.serial as _order_info_serial, order_info.user_id as _order_info_user_id, order_info.snapshot_price as _order_info_snapshot_price, order_info.delivery_fee as _order_info_delivery_fee, order_info.discount_price as _order_info_discount_price, order_info.pay_price as _order_info_pay_price, order_info.serve_type as _order_info_serve_type, order_info.status as _order_info_status, order_info.pay_type as _order_info_pay_type, order_info.pay_serial as _order_info_pay_serial, order_info.pay_time as _order_info_pay_time, order_info.refund_serial as _order_info_refund_serial, order_info.refund_type as _order_info_refund_type, order_info.refund_id as _order_info_refund_id, order_info.refund_time as _order_info_refund_time, order_info.create_time as _order_info_create_time, order_info.receive_time as _order_info_receive_time, order_info.comment_time as _order_info_comment_time, order_info.user_delete_flag as _order_info_user_delete_flag, order_info.invoice_id as _order_info_invoice_id, order_info.share_status as _order_info_share_status, order_info.share_time as _order_info_share_time, order_info.share_operator_id as _order_info_share_operator_id, order_info.comment_rate as _order_info_comment_rate, order_info.service_fee as _order_info_service_fee
+    </sql>
+
+    <select id="countUserOrderNum" resultType="java.lang.Long">
+        SELECT count(DISTINCT order_info.order_id)
+        FROM order_info
+        LEFT JOIN order_goods ON order_info.order_id = order_goods.order_id
+        LEFT JOIN goods_snapshot ON order_goods.goods_snapshot_id = goods_snapshot.goods_snapshot_id
+        <where>
+            order_info.user_id = #{userId}
+            <choose>
+                <when test="statusCode !=null and statusCode == 1">
+                    and order_info.status = 'to_pay'
+                </when>
+                <when test="statusCode !=null and statusCode == 2">
+                    and (order_info.serve_type = 'offline' and order_info.status = 'payed')
+                </when>
+                <when test="statusCode !=null and statusCode == 3">
+                    and ((order_info.serve_type = 'online' and order_info.status = 'payed') or (order_info.serve_type =
+                    'offline' and order_info.status = 'confirm_sp'))
+                </when>
+                <when test="statusCode !=null and statusCode == 4">
+                    and (order_info.status = 'confirmed')
+                </when>
+                <when test="statusCode !=null and statusCode == 5">
+                    and (order_info.serve_type = 'offline' and (order_info.status = 'validated' or order_info.status =
+                    'received'))
+                </when>
+                <when test="statusCode !=null and statusCode == 6">
+                    and ((order_info.serve_type = 'online' and order_info.status = 'received') or (order_info.serve_type
+                    = 'offline' and order_info.status = 'complete_s'))
+                </when>
+                <when test="statusCode !=null and statusCode == 7">
+                    and order_info.status = 'comment'
+                </when>
+                <when test="statusCode !=null and statusCode == 8">
+                    and order_info.status = 'expired'
+                </when>
+                <when test="statusCode !=null and statusCode == 9">
+                    and (order_info.status = 'refused' or order_info.status = 'refunded')
+                </when>
+                <when test="statusCode !=null and statusCode == 10">
+                    and order_info.status NOT IN ('expired')
+                </when>
+            </choose>
+            <if test="goodsIds != null and goodsIds.size() > 0">
+                and goods_snapshot.goods_id in
+                <foreach item="item" index="index" collection="goodsIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            and order_info.user_delete_flag = 0
+        </where>
+    </select>
+
+    <select id="getUserOrderIdList" resultType="java.lang.Long">
+        select
+        DISTINCT(order_info.id)
+        FROM order_info
+        LEFT JOIN order_goods ON order_goods.order_id = order_info.order_id
+        LEFT JOIN goods_snapshot on goods_snapshot.goods_snapshot_id = order_goods.goods_snapshot_id
+        <where>
+            order_info.user_id = #{userId}
+            <choose>
+                <when test="statusCode !=null and statusCode == 1">
+                    and order_info.status = 'to_pay'
+                </when>
+                <when test="statusCode !=null and statusCode == 2">
+                    and (order_info.serve_type = 'offline' and order_info.status = 'payed')
+                </when>
+                <when test="statusCode !=null and statusCode == 3">
+                    and ((order_info.serve_type = 'online' and order_info.status = 'payed') or (order_info.serve_type =
+                    'offline' and order_info.status = 'confirm_sp'))
+                </when>
+                <when test="statusCode !=null and statusCode == 4">
+                    and (order_info.status = 'confirmed')
+                </when>
+                <when test="statusCode !=null and statusCode == 5">
+                    and (order_info.serve_type = 'offline' and (order_info.status = 'validated' or order_info.status =
+                    'received'))
+                </when>
+                <when test="statusCode !=null and statusCode == 6">
+                    and ((order_info.serve_type = 'online' and order_info.status = 'received') or (order_info.serve_type
+                    = 'offline' and order_info.status = 'complete_s'))
+                </when>
+                <when test="statusCode !=null and statusCode == 7">
+                    and order_info.status = 'comment'
+                </when>
+                <when test="statusCode !=null and statusCode == 8">
+                    and order_info.status = 'expired'
+                </when>
+                <when test="statusCode !=null and statusCode == 9">
+                    and (order_info.status = 'refused' or order_info.status = 'refunded')
+                </when>
+                <when test="statusCode !=null and statusCode == 10">
+                    and order_info.status NOT IN ('expired')
+                </when>
+            </choose>
+            <if test="goodsIds != null and goodsIds.size() > 0">
+                and goods_snapshot.goods_id in
+                <foreach item="item" index="index" collection="goodsIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            and order_info.user_delete_flag = 0
+        </where>
+        order by order_info.create_time desc
+        LIMIT #{start},#{limit};
+    </select>
+
+
+    <select id="getUserOrderList" resultMap="order_info_map">
+        select
+        <include refid="order_info_fields"/>,
+        <include refid="com.autoask.mapper.OrderServeMapper.order_serve_fields"></include>,
+        <include refid="com.autoask.mapper.OrderAppointValidateMapper.order_appoint_validate_fields"></include>,
+        <include refid="com.autoask.mapper.OrderDeliveryMapper.order_delivery_fields"></include>,
+        <include refid="com.autoask.mapper.OrderGoodsMapper.order_goods_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsSnapshotMapper.goods_snapshot_fields"></include>,
+        <include refid="com.autoask.mapper.ProductMapper.product_fields"></include>
+        FROM order_info
+        LEFT JOIN order_serve on order_info.order_id = order_serve.order_id
+        LEFT JOIN order_appoint_validate on order_appoint_validate.order_id = order_info.order_id
+        LEFT JOIN order_delivery on order_info.order_id = order_delivery.order_id
+        LEFT JOIN order_goods ON order_goods.order_id = order_info.order_id
+        LEFT JOIN goods_snapshot on goods_snapshot.goods_snapshot_id = order_goods.goods_snapshot_id
+        LEFT JOIN product on product.product_id = goods_snapshot.product_id
+        WHERE
+        order_info.id IN
+        <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        order by order_info.create_time desc
+    </select>
+
+    <select id="getUserLastServiceProvider" resultType="java.lang.String">
+        SELECT order_serve.service_provider_id
+        FROM order_serve
+        LEFT JOIN order_info on order_info.order_id = order_serve.order_id
+        WHERE order_info.user_id = #{userId}
+        order by order_info.create_time desc
+        limit 1;
+    </select>
+
+    <select id="getDetail" resultMap="order_info_map">
+        SELECT
+        <include refid="order_info_fields"></include>,
+        <include refid="com.autoask.mapper.UserMapper.user_public_fields"></include>,
+        <include refid="com.autoask.mapper.OrderServeMapper.order_serve_fields"></include>,
+        <include refid="com.autoask.mapper.OrderDeliveryMapper.order_delivery_fields"></include>,
+        <include refid="com.autoask.mapper.OrderGoodsMapper.order_goods_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsSnapshotMapper.goods_snapshot_fields"></include>,
+        <include refid="com.autoask.mapper.ProductMapper.product_fields"></include>
+        FROM order_info
+        LEFT JOIN user ON user.user_id = order_info.user_id
+        LEFT JOIN order_serve ON order_info.order_id = order_serve.order_id
+        LEFT JOIN order_delivery ON order_info.order_id = order_delivery.order_id
+        LEFT JOIN order_goods ON order_info.order_id = order_goods.order_id
+        LEFT JOIN goods_snapshot ON order_goods.goods_snapshot_id = goods_snapshot.goods_snapshot_id
+        LEFT JOIN product ON product.product_id = goods_snapshot.product_id
+        WHERE order_info.order_id = #{orderId};
+    </select>
+
+    <select id="getDetailByRefundSerial" resultMap="order_info_map">
+        SELECT
+        <include refid="order_info_fields"></include>,
+        <include refid="com.autoask.mapper.UserMapper.user_public_fields"></include>,
+        <include refid="com.autoask.mapper.OrderServeMapper.order_serve_fields"></include>,
+        <include refid="com.autoask.mapper.OrderDeliveryMapper.order_delivery_fields"></include>,
+        <include refid="com.autoask.mapper.OrderGoodsMapper.order_goods_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsSnapshotMapper.goods_snapshot_fields"></include>,
+        <include refid="com.autoask.mapper.ProductMapper.product_fields"></include>
+        FROM order_info
+        LEFT JOIN user ON user.user_id = order_info.user_id
+        LEFT JOIN order_serve ON order_info.order_id = order_serve.order_id
+        LEFT JOIN order_delivery ON order_info.order_id = order_delivery.order_id
+        LEFT JOIN order_goods ON order_info.order_id = order_goods.order_id
+        LEFT JOIN goods_snapshot ON order_goods.goods_snapshot_id = goods_snapshot.goods_snapshot_id
+        LEFT JOIN product ON product.product_id = goods_snapshot.product_id
+        WHERE order_info.refund_serial = #{refundSerial};
+    </select>
+
+    <select id="getDetailWithShare" resultMap="order_info_map">
+        SELECT
+        <include refid="order_info_fields"></include>,
+        <include refid="com.autoask.mapper.UserMapper.user_public_fields"></include>,
+        <include refid="com.autoask.mapper.OrderShareMapper.order_share_fields"></include>,
+        <include refid="com.autoask.mapper.OrderServeMapper.order_serve_fields"></include>,
+        <include refid="com.autoask.mapper.OrderDeliveryMapper.order_delivery_fields"></include>,
+        <include refid="com.autoask.mapper.OrderGoodsMapper.order_goods_fields"></include>,
+        <include refid="com.autoask.mapper.OrderGoodsCardMapper.order_goods_card_fields"></include>,
+        <include refid="com.autoask.mapper.OrderGoodsShareMapper.order_goods_share_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsSnapshotMapper.goods_snapshot_fields"></include>,
+        <include refid="com.autoask.mapper.ProductMapper.product_fields"></include>
+        FROM order_info
+        LEFT JOIN user ON user.user_id = order_info.user_id
+        LEFT JOIN order_share on order_share.order_id = order_info.order_id
+        LEFT JOIN order_serve ON order_info.order_id = order_serve.order_id
+        LEFT JOIN order_delivery ON order_info.order_id = order_delivery.order_id
+        LEFT JOIN order_goods ON order_info.order_id = order_goods.order_id
+        LEFT JOIN order_goods_card ON order_goods_card.order_goods_id = order_goods.order_goods_id
+        LEFT JOIN order_goods_share on order_goods_share.order_goods_id = order_goods.order_goods_id
+        LEFT JOIN goods_snapshot ON order_goods.goods_snapshot_id = goods_snapshot.goods_snapshot_id
+        LEFT JOIN product ON product.product_id = goods_snapshot.product_id
+        WHERE order_info.order_id = #{orderId};
+    </select>
+
+    <select id="getOrderListBySerial" resultMap="order_info_map">
+        SELECT
+        <include refid="order_info_fields"></include>,
+        <include refid="com.autoask.mapper.OrderServeMapper.order_serve_fields"></include>,
+        <include refid="com.autoask.mapper.OrderDeliveryMapper.order_delivery_fields"></include>,
+        <include refid="com.autoask.mapper.OrderGoodsMapper.order_goods_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsSnapshotMapper.goods_snapshot_fields"></include>
+        FROM order_info
+        LEFT JOIN order_serve ON order_info.order_id = order_serve.order_id
+        LEFT JOIN order_delivery ON order_info.order_id = order_delivery.order_id
+        LEFT JOIN order_goods ON order_info.order_id = order_goods.order_id
+        LEFT JOIN goods_snapshot ON order_goods.goods_snapshot_id = goods_snapshot.goods_snapshot_id
+        WHERE order_info.serial = #{serial};
+    </select>
+
+    <select id="getOrderListByPaySerial" resultMap="order_info_map">
+        SELECT
+        <include refid="order_info_fields"></include>,
+        <include refid="com.autoask.mapper.OrderServeMapper.order_serve_fields"></include>,
+        <include refid="com.autoask.mapper.OrderDeliveryMapper.order_delivery_fields"></include>,
+        <include refid="com.autoask.mapper.OrderGoodsMapper.order_goods_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsSnapshotMapper.goods_snapshot_fields"></include>
+        FROM order_info
+        LEFT JOIN order_serve ON order_info.order_id = order_serve.order_id
+        LEFT JOIN order_delivery ON order_info.order_id = order_delivery.order_id
+        LEFT JOIN order_goods ON order_info.order_id = order_goods.order_id
+        LEFT JOIN goods_snapshot ON order_goods.goods_snapshot_id = goods_snapshot.goods_snapshot_id
+        WHERE order_info.pay_serial = #{paySerial} AND order_info.status = #{status}
+    </select>
+
+    <update id="updateOrderInfoStatus">
+        update order_info set status = #{toStatus} where order_id = #{orderId}
+    </update>
+
+    <update id="updateOrderPayedByPaySerial">
+        UPDATE order_info
+        SET status = #{status},pay_time = current_timestamp
+        WHERE pay_serial = #{paySerial}
+    </update>
+
+    <update id="updateOrderPayedBySerial">
+        UPDATE order_info
+        SET status = #{status}
+        WHERE serial = #{serial}
+    </update>
+
+
+    <update id="updateOrderInfoComment">
+        UPDATE order_info
+        SET status = #{status}, comment_time = current_timestamp,comment_rate = #{commentRate}
+        WHERE order_id = #{orderId}
+    </update>
+
+    <update id="setPaySerial">
+        UPDATE order_info SET pay_serial = #{paySerial} WHERE serial = #{serial};
+    </update>
+
+    <update id="setRefundSerial">
+        UPDATE order_info
+        SET refund_serial = #{refundSerial},refund_type = #{refundSerial},refund_id = #{refundId} ,refund_time =
+        current_timestamp
+        WHERE order_id = #{orderId}
+    </update>
+
+    <select id="countOrderInfoNum" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM order_info
+        LEFT JOIN user
+        ON order_info.user_id = user.user_id
+        <where>
+            ((order_info.serve_type != 'offline_cash' AND order_info.status != 'to_pay') OR (order_info.serve_type =
+            'offline_cash' AND order_info.status = 'confirmed'))
+            <if test="orderId != null and orderId != ''">
+                AND order_info.order_id = #{orderId}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND order_info.create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND order_info.create_time &lt;= #{endTime}
+            </if>
+            <if test="serveTypes != null and serveTypes.size > 0 ">
+                and order_info.serve_type IN
+                <foreach item="item" index="index" collection="serveTypes" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="statusList != null and statusList.size > 0 ">
+                and order_info.status IN
+                <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="phone != null and phone != '' ">
+                and user.phone = #{phone}
+            </if>
+        </where>
+    </select>
+
+    <select id="getOrderInfoIds" resultType="java.lang.Long">
+        SELECT
+        DISTINCT(order_info.id)
+        FROM order_info
+        LEFT JOIN user
+        ON order_info.user_id = user.user_id
+        LEFT JOIN order_delivery ON order_delivery.order_id = order_info.order_id
+        LEFT JOIN order_serve on order_serve.order_id = order_info.order_id
+        <where>
+            ((order_info.serve_type != 'offline_cash' AND order_info.status != 'to_pay') OR (order_info.serve_type =
+            'offline_cash' AND order_info.status = 'confirmed'))
+            <if test="orderId != null and orderId != ''">
+                AND order_info.order_id = #{orderId}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND order_info.create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND order_info.create_time &lt;= #{endTime}
+            </if>
+            <if test="serveTypes != null and serveTypes.size > 0 ">
+                and order_info.serve_type IN
+                <foreach item="item" index="index" collection="serveTypes" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="statusList != null and statusList.size > 0 ">
+                and order_info.status IN
+                <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="phone != null and phone != '' ">
+                and user.phone = #{phone}
+            </if>
+        </where>
+        ORDER BY order_info.create_time DESC
+        limit #{start},#{limit}
+    </select>
+
+
+    <select id="selectOrderInfoList" resultMap="order_info_map">
+        SELECT
+        <include refid="order_info_fields"></include>,
+        <include refid="com.autoask.mapper.UserMapper.user_fields"></include>,
+        <include refid="com.autoask.mapper.OrderDeliveryMapper.order_delivery_fields"></include>,
+        <include refid="com.autoask.mapper.OrderServeMapper.order_serve_fields"></include>
+        FROM order_info
+        LEFT JOIN user
+        ON order_info.user_id = user.user_id
+        LEFT JOIN order_delivery ON order_delivery.order_id = order_info.order_id
+        LEFT JOIN order_serve on order_serve.order_id = order_info.order_id
+        WHERE
+        order_info.id IN
+        <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY order_info.create_time DESC
+    </select>
+
+
+    <select id="countServiceProviderNewOrderNum" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM order_info
+          LEFT JOIN order_serve ON order_info.order_id = order_serve.order_id
+        WHERE order_serve.service_provider_id = #{serviceProviderId} AND
+        order_info.status = #{payedStatus}
+    </select>
+
+    <select id="getServiceProviderNewOrderIds" resultType="java.lang.Long">
+        SELECT
+        DISTINCT(order_info.id)
+        FROM order_info
+        LEFT JOIN user ON order_info.user_id = user.user_id
+        LEFT JOIN order_serve ON order_info.order_id = order_serve.order_id
+        WHERE
+        order_serve.service_provider_id = #{serviceProviderId} AND
+        order_info.status = #{payedStatus}
+        ORDER BY order_info.create_time DESC
+        limit #{start},#{limit}
+    </select>
+
+
+    <select id="getServiceProviderNewOrderList" resultMap="order_info_map">
+        SELECT
+        <include refid="order_info_fields"></include>,
+        <include refid="com.autoask.mapper.UserMapper.user_fields"></include>,
+        <include refid="com.autoask.mapper.OrderServeMapper.order_serve_fields"></include>
+        FROM order_info
+        LEFT JOIN user ON order_info.user_id = user.user_id
+        LEFT JOIN order_serve ON order_info.order_id = order_serve.order_id
+        WHERE
+        order_info.id IN
+        <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY order_info.create_time DESC
+    </select>
+
+
+    <select id="countOfflineOrderNum" resultType="java.lang.Long">
+        SELECT count(DISTINCT order_info.order_id)
+        FROM order_info
+        LEFT JOIN order_serve ON order_serve.order_id = order_info.order_id
+        LEFT JOIN user ON user.user_id = order_info.user_id
+        LEFT JOIN order_goods ON order_goods.order_id = order_info.order_id
+        LEFT JOIN goods_snapshot ON goods_snapshot.goods_snapshot_id = order_goods.goods_snapshot_id
+        <where>
+            order_info.serve_type = 'offline' and order_info.status != 'to_pay'
+            <if test="orderId != null and orderId !=''">
+                AND order_info.order_id = #{orderId}
+            </if>
+            <if test="serviceProviderId != null and serviceProviderId !=''">
+                AND order_serve.service_provider_id = #{serviceProviderId}
+            </if>
+            <if test="mechanicId != null and mechanicId !=''">
+                AND order_serve.mechanic_id = #{mechanicId}
+            </if>
+            <if test="startTime != null and startTime !=''">
+                AND order_info.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null and endTime !=''">
+                AND order_info.create_time &lt; #{endTime}
+            </if>
+            <if test="goodsIds != null and goodsIds.size() > 0">
+                AND goods_snapshot.goods_id IN
+                <foreach item="item" index="index" collection="goodsIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="serveTypeList != null and serveTypeList.size() > 0">
+                AND order_info.serve_type in
+                <foreach item="item" index="index" collection="serveTypeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="statusList != null and statusList.size() > 0">
+                AND order_info.status in
+                <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getOfflineOrderIds" resultType="java.lang.Long">
+        SELECT
+        DISTINCT(order_info.id)
+        FROM order_info
+        LEFT JOIN order_serve ON order_serve.order_id = order_info.order_id
+        LEFT JOIN user ON user.user_id = order_info.user_id
+        LEFT JOIN order_goods ON order_goods.order_id = order_info.order_id
+        LEFT JOIN goods_snapshot ON goods_snapshot.goods_snapshot_id = order_goods.goods_snapshot_id
+        <where>
+            order_info.serve_type = 'offline' and order_info.status != 'to_pay'
+            <if test="orderId != null and orderId !=''">
+                AND order_info.order_id = #{orderId}
+            </if>
+            <if test="serviceProviderId != null and serviceProviderId !=''">
+                AND order_serve.service_provider_id = #{serviceProviderId}
+            </if>
+            <if test="mechanicId != null and mechanicId !=''">
+                AND order_serve.mechanic_id = #{mechanicId}
+            </if>
+            <if test="startTime != null and startTime !=''">
+                AND order_info.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null and endTime !=''">
+                AND order_info.create_time &lt; #{endTime}
+            </if>
+            <if test="goodsIds != null and goodsIds.size() > 0">
+                AND goods_snapshot.goods_id IN
+                <foreach item="item" index="index" collection="goodsIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="serveTypeList != null and serveTypeList.size() > 0">
+                AND order_info.serve_type in
+                <foreach item="item" index="index" collection="serveTypeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="statusList != null and statusList.size() > 0">
+                AND order_info.status in
+                <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        order by order_info.create_time desc
+        limit #{start}, #{limit}
+    </select>
+
+
+    <select id="getOfflineOrderList" resultMap="order_info_map">
+        SELECT
+        <include refid="order_info_fields"></include>,
+        <include refid="com.autoask.mapper.OrderDeliveryMapper.order_delivery_fields"></include>,
+        <include refid="com.autoask.mapper.UserMapper.user_public_fields"></include>,
+        <include refid="com.autoask.mapper.OrderServeMapper.order_serve_fields"></include>
+        FROM order_info
+        LEFT JOIN order_delivery ON order_delivery.order_id = order_info.order_id
+        LEFT JOIN order_serve ON order_serve.order_id = order_info.order_id
+        LEFT JOIN user ON user.user_id = order_info.user_id
+        LEFT JOIN order_goods ON order_goods.order_id = order_info.order_id
+        LEFT JOIN goods_snapshot ON goods_snapshot.goods_snapshot_id = order_goods.goods_snapshot_id
+        WHERE
+        order_info.id IN
+        <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY order_info.create_time DESC
+    </select>
+
+    <select id="countOnlineOrderNum" resultType="java.lang.Long">
+        SELECT count(DISTINCT order_info.order_id)
+        FROM order_info
+        LEFT JOIN order_delivery ON order_delivery.order_id = order_info.order_id
+        LEFT JOIN user ON user.user_id = order_info.user_id
+        LEFT JOIN order_goods ON order_goods.order_id = order_info.order_id
+        LEFT JOIN goods_snapshot ON goods_snapshot.goods_snapshot_id = order_goods.goods_snapshot_id
+        <where>
+            ((order_info.serve_type != 'offline_cash' and order_info.status not in
+            ('to_pay','expired','pay_failure')) or
+            order_info.serve_type = 'offline_cash')
+            <if test="orderId != null and orderId !=''">
+                AND order_info.order_id = #{orderId}
+            </if>
+            <if test="merchantType != null and merchantType !=''">
+                AND order_delivery.merchant_type = #{merchantType}
+            </if>
+            <if test="merchantId != null and merchantId !=''">
+                AND order_delivery.merchant_id = #{merchantId}
+            </if>
+            <if test="startTime != null and startTime !=''">
+                AND order_info.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null and endTime !=''">
+                AND order_info.create_time &lt; #{endTime}
+            </if>
+            <if test="goodsIds != null and goodsIds.size() > 0">
+                AND goods_snapshot.goods_id IN
+                <foreach item="item" index="index" collection="goodsIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="serveType != null and serveType !=''">
+                AND order_info.serve_type = #{serveType}
+            </if>
+            <if test="statusList != null and statusList.size() > 0">
+                AND order_info.status in
+                <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getOnlineOrderIds" resultType="java.lang.Long">
+        SELECT
+        DISTINCT(order_info.id)
+        FROM order_info
+        LEFT JOIN order_delivery ON order_delivery.order_id = order_info.order_id
+        LEFT JOIN user ON user.user_id = order_info.user_id
+        LEFT JOIN order_goods ON order_goods.order_id = order_info.order_id
+        LEFT JOIN goods_snapshot ON goods_snapshot.goods_snapshot_id = order_goods.goods_snapshot_id
+        <where>
+            ((order_info.serve_type != 'offline_cash' and order_info.status not in
+            ('to_pay','expired','pay_failure')) or
+            order_info.serve_type = 'offline_cash')
+            <if test="orderId != null and orderId !=''">
+                AND order_info.order_id = #{orderId}
+            </if>
+            <if test="merchantType != null and merchantType !=''">
+                AND order_delivery.merchant_type = #{merchantType}
+            </if>
+            <if test="merchantId != null and merchantId !=''">
+                AND order_delivery.merchant_id = #{merchantId}
+            </if>
+            <if test="startTime != null and startTime !=''">
+                AND order_info.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null and endTime !=''">
+                AND order_info.create_time &lt; #{endTime}
+            </if>
+            <if test="goodsIds != null and goodsIds.size() > 0">
+                AND goods_snapshot.goods_id IN
+                <foreach item="item" index="index" collection="goodsIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="serveType != null and serveType !=''">
+                AND order_info.serve_type = #{serveType}
+            </if>
+            <if test="statusList != null and statusList.size() > 0">
+                AND order_info.status in
+                <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        order by order_info.create_time desc
+        limit #{start}, #{limit}
+    </select>
+
+
+    <select id="getOnlineOrderList" resultMap="order_info_map">
+        SELECT
+        <include refid="order_info_fields"></include>,
+        <include refid="com.autoask.mapper.UserMapper.user_public_fields"></include>,
+        <include refid="com.autoask.mapper.OrderDeliveryMapper.order_delivery_fields"></include>
+        FROM order_info
+        LEFT JOIN order_delivery ON order_delivery.order_id = order_info.order_id
+        LEFT JOIN user ON user.user_id = order_info.user_id
+        LEFT JOIN order_goods ON order_goods.order_id = order_info.order_id
+        LEFT JOIN goods_snapshot ON goods_snapshot.goods_snapshot_id = order_goods.goods_snapshot_id
+        WHERE
+        order_info.id IN
+        <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY order_info.create_time DESC
+    </select>
+
+    <select id="selectOrderShareNum" resultType="java.lang.Long">
+        SELECT count(order_info.order_id)
+        FROM order_info
+        LEFT JOIN order_share ON order_info.order_id = order_share.order_id
+        <where>
+            ((order_info.serve_type = "online" AND order_info.status IN ('received', 'comment')) OR
+            ((order_info.serve_type = 'offline') AND order_info.status IN ('complete_s', 'comment')))
+            <if test="startTime != null and startTime != ''">
+                AND order_info.receive_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND order_info.receive_time &lt; #{endTime}
+            </if>
+            <if test="orderId != null and orderId != ''">
+                AND order_info.order_id = #{orderId}
+            </if>
+            <if test="shareStatus != null and shareStatus != ''">
+                AND order_info.share_status = #{shareStatus}
+            </if>
+            AND (order_share.promote_fee != 0 OR order_share.ad_fee != 0 OR order_share.service_fee != 0 OR
+            order_share.factory_fee != 0)
+        </where>
+    </select>
+
+    <select id="selectOrderShareCheckList" resultMap="order_info_map">
+        SELECT
+        <include refid="order_info_fields"></include>,
+        <include refid="com.autoask.mapper.OrderShareMapper.order_share_fields"></include>
+        FROM order_info
+        LEFT JOIN order_share on order_info.order_id = order_share.order_id
+        <where>
+            ((order_info.serve_type = "online" AND order_info.status IN ('received', 'comment')) OR
+            ((order_info.serve_type = 'offline') AND order_info.status IN ('complete_s', 'comment')))
+            <if test="startTime != null and startTime != ''">
+                AND order_info.receive_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND order_info.receive_time &lt; #{endTime}
+            </if>
+            <if test="orderId != null and orderId != ''">
+                AND order_info.order_id = #{orderId}
+            </if>
+            <if test="shareStatus != null and shareStatus !=''">
+                AND order_info.share_status = #{shareStatus}
+            </if>
+            AND (order_share.promote_fee != 0 OR order_share.ad_fee != 0 OR order_share.service_fee != 0 OR
+            order_share.factory_fee != 0)
+        </where>
+        ORDER BY order_info.create_time DESC
+        limit #{start},#{limit}
+    </select>
+
+
+    <update id="updateOrderInfoShareStatus">
+        UPDATE order_info
+        SET share_status = #{shareStatus}, share_time = current_timestamp
+        WHERE order_id = #{orderId}
+    </update>
+
+    <update id="updateOrderRefunded">
+        UPDATE order_info
+        SET status = #{status},refund_time = current_timestamp
+        WHERE order_id = #{orderId}
+    </update>
+
+    <update id="updateOrderReceived">
+        UPDATE order_info
+        SET status = #{status},receive_time = current_timestamp
+        WHERE order_id = #{orderId}
+    </update>
+
+
+    <select id="getTodaySellAmount" resultType="java.math.BigDecimal">
+        SELECT sum(snapshot_price)
+        FROM order_info
+        WHERE order_info.status IN
+        <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND date(order_info.create_time) = date(current_timestamp)
+    </select>
+
+    <select id="getTotalSellAmount" resultType="java.math.BigDecimal">
+        SELECT sum(snapshot_price)
+        FROM order_info
+        WHERE order_info.status IN
+        <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getTodaySellGoodsNum" resultType="java.lang.Long">
+        SELECT sum(order_goods.num)
+        FROM order_info
+        LEFT JOIN order_goods
+        ON order_info.order_id = order_goods.order_id
+        WHERE order_info.status IN
+        <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND date(order_info.create_time) = date(current_timestamp)
+    </select>
+
+    <select id="getTotalSellGoodsNum" resultType="java.lang.Long">
+        SELECT sum(order_goods.num)
+        FROM order_info
+        LEFT JOIN order_goods
+        ON order_info.order_id = order_goods.order_id
+        WHERE order_info.status IN
+        <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getTodayOrderNum" resultType="java.lang.Long">
+        SELECT count(1) FROM order_info
+        WHERE order_info.status IN
+        <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND date(order_info.create_time) = date(current_timestamp)
+    </select>
+
+
+    <select id="getTotalOrderNum" resultType="java.lang.Long">
+        SELECT count(1) FROM order_info
+        WHERE order_info.status IN
+        <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getPartnerOrderSell" resultType="java.math.BigDecimal">
+        SELECT sum(order_info.snapshot_price)
+        FROM order_info
+        LEFT JOIN order_delivery ON order_info.order_id = order_delivery.order_id
+        LEFT JOIN order_serve ON order_info.order_id = order_serve.order_id
+        WHERE ((order_delivery.merchant_type = #{partnerType} AND order_delivery.merchant_id = #{partnerId} AND
+        order_info.status IN
+        <foreach item="item" index="index" collection="onlineStatusList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        )
+        OR
+        (order_serve.partner_id = #{partnerId}
+        AND order_info.status IN
+        <foreach item="item" index="index" collection="offlineStatusList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ))
+        AND order_info.create_time &gt; #{starTime} AND order_info.create_time &lt; #{endTime}
+    </select>
+
+    <select id="getServiceProviderSell" resultType="java.math.BigDecimal">
+        SELECT sum(order_info.snapshot_price)
+        FROM order_info
+        LEFT JOIN order_serve ON order_info.order_id = order_serve.order_id
+        WHERE
+        order_serve.service_provider_id = #{serviceProviderId}
+        AND order_info.status IN
+        <foreach item="item" index="index" collection="offlineStatusList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND order_info.create_time &gt; #{startTime}
+        AND order_info.create_time &lt; #{endTime}
+    </select>
+
+    <select id="getFactorySell" resultType="java.math.BigDecimal">
+        SELECT sum(order_info.snapshot_price)
+        FROM order_info
+        LEFT JOIN order_delivery ON order_info.order_id = order_delivery.order_id
+        WHERE
+        order_delivery.merchant_type = #{factoryMerchantType}
+        AND order_delivery.merchant_id = #{factoryId}
+        AND order_info.status IN
+        <foreach item="item" index="index" collection="onlineStatusList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND order_info.create_time &gt; #{startTime}
+        AND order_info.create_time &lt; #{endTime}
+    </select>
+
+    <select id="getRollBackOrderInfoList" resultMap="order_info_map">
+        SELECT
+        <include refid="order_info_fields"></include>
+        FROM order_info
+        WHERE
+        UNIX_TIMESTAMP(order_info.create_time)&lt;= UNIX_TIMESTAMP() - 172800 and order_info.status='to_pay' ORDER BY
+        order_info.create_time DESC
+    </select>
+
+</mapper>

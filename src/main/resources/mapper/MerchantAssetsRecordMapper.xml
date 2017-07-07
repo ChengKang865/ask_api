@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.MerchantAssetsRecordMapper">
+    <resultMap id="merchant_assets_record_map" type="com.autoask.entity.mysql.MerchantAssetsRecord">
+        <result column="_merchant_assets_record_id" jdbcType="BIGINT" property="id"/>
+        <result column="_merchant_assets_record_record_id" jdbcType="VARCHAR" property="recordId"/>
+        <result column="_merchant_assets_record_merchant_type" jdbcType="VARCHAR" property="merchantType"/>
+        <result column="_merchant_assets_record_merchant_id" jdbcType="VARCHAR" property="merchantId"/>
+        <result column="_merchant_assets_record_change_amount" jdbcType="DECIMAL" property="changeAmount"/>
+        <result column="_merchant_assets_record_related_type" jdbcType="VARCHAR" property="relatedType"/>
+        <result column="_merchant_assets_record_related_id" jdbcType="VARCHAR" property="relatedId"/>
+        <result column="_merchant_assets_record_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <association property="orderInfo" resultMap="com.autoask.mapper.OrderInfoMapper.order_info_map"/>
+        <collection property="assetsRecordItemList" ofType="AssetsRecordItem"
+                    resultMap="com.autoask.mapper.AssetsRecordItemMapper.assets_record_item_map"></collection>
+    </resultMap>
+
+    <sql id="merchant_assets_record_fields">
+        merchant_assets_record.id as _merchant_assets_record_id, merchant_assets_record.record_id as _merchant_assets_record_record_id, merchant_assets_record.merchant_type as _merchant_assets_record_merchant_type, merchant_assets_record.merchant_id as _merchant_assets_record_merchant_id, merchant_assets_record.change_amount as _merchant_assets_record_change_amount, merchant_assets_record.related_type as _merchant_assets_record_related_type, merchant_assets_record.related_id as _merchant_assets_record_related_id, merchant_assets_record.create_time as _merchant_assets_record_create_time
+    </sql>
+
+    <select id="countMerchantAssetsRecord" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM merchant_assets_record
+        <where>
+            <if test="merchantType != null and merchantType != ''">
+                AND merchant_type = #{merchantType}
+            </if>
+            <if test="merchantIds != null and merchantIds.size() > 0">
+                AND merchant_id IN
+                <foreach item="item" index="index" collection="merchantIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="orderId != null and orderId != ''">
+                AND related_id = #{orderId}
+            </if>
+            <if test=" startTime != null and startTime !=''">
+                AND create_time &gt; #{startTime}
+            </if>
+            <if test=" endTime != null and endTime !=''">
+                AND create_time &lt; #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectMerchantAssetsRecordList" resultMap="merchant_assets_record_map">
+        SELECT
+        <include refid="merchant_assets_record_fields"></include>,
+        <include refid="com.autoask.mapper.OrderInfoMapper.order_info_fields"></include>,
+        <include refid="com.autoask.mapper.AssetsRecordItemMapper.assets_record_item_fields"></include>
+        FROM merchant_assets_record
+        LEFT JOIN order_info ON order_info.order_id = merchant_assets_record.related_id
+        LEFT JOIN assets_record_item ON assets_record_item.record_id = merchant_assets_record.record_id
+        <where>
+            <if test="merchantType != null and merchantType != ''">
+                AND merchant_assets_record.merchant_type = #{merchantType}
+            </if>
+            <if test="merchantIds != null and merchantIds.size() > 0">
+                AND merchant_assets_record.merchant_id IN
+                <foreach item="item" index="index" collection="merchantIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="orderId != null and orderId != ''">
+                AND merchant_assets_record.related_id = #{orderId}
+            </if>
+            <if test=" startTime != null and startTime !=''">
+                AND merchant_assets_record.create_time &gt; #{startTime}
+            </if>
+            <if test=" endTime != null and endTime !=''">
+                AND merchant_assets_record.create_time &lt; #{endTime}
+            </if>
+        </where>
+        order by merchant_assets_record.create_time desc
+        limit #{start}, #{limit}
+    </select>
+
+    <select id="countIncome" resultType="java.math.BigDecimal">
+        SELECT sum(change_amount)
+        FROM merchant_assets_record
+        WHERE merchant_assets_record.create_time &gt; #{startTime} AND merchant_assets_record.create_time &lt; #{endTime}
+        AND merchant_assets_record.merchant_type = #{merchantType} AND merchant_assets_record.merchant_id = #{merchantId}
+        AND merchant_assets_record.change_amount > 0
+    </select>
+</mapper>

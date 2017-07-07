@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.CardMapper">
+    <resultMap id="card_map" type="com.autoask.entity.mysql.Card">
+        <result column="_card_id" jdbcType="BIGINT" property="id"/>
+        <result column="_card_card_id" jdbcType="VARCHAR" property="cardId"/>
+        <result column="_card_verify_code" jdbcType="VARCHAR" property="verifyCode"/>
+        <result column="_card_status" jdbcType="VARCHAR" property="status"/>
+        <result column="_card_card_type_id" jdbcType="VARCHAR" property="cardTypeId"/>
+        <result column="_card_use_time" jdbcType="TIMESTAMP" property="useTime"/>
+        <result column="_card_user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="_card_check_time" jdbcType="TIMESTAMP" property="checkTime"/>
+        <result column="_card_check_id" jdbcType="VARCHAR" property="checkId"/>
+        <result column="_card_delete_flag" jdbcType="BOOLEAN" property="deleteFlag"/>
+        <result column="_card_type_sort" jdbcType="BIGINT" property="typeSort"/>
+        <result column="_card_delete_time" jdbcType="TIMESTAMP" property="deleteTime"/>
+        <result column="_card_delete_id" jdbcType="VARCHAR" property="deleteId"/>
+        <result column="_card_order_goods_id" jdbcType="VARCHAR" property="orderGoodsId"/>
+        <association property="cardType" resultMap="com.autoask.mapper.CardTypeMapper.card_type_map"/>
+    </resultMap>
+
+    <sql id="card_fields">
+        card.id as _card_id, card.card_id as _card_card_id, card.verify_code as _card_verify_code, card.status as _card_status, card.card_type_id as _card_card_type_id, card.use_time as _card_use_time, card.user_id as _card_user_id, card.check_time as _card_check_time, card.check_id as _card_check_id, card.delete_flag as _card_delete_flag, card.type_sort as _card_type_sort, card.delete_time as _card_delete_time, card.delete_id as _card_delete_id
+    </sql>
+
+    <resultMap id="use_map" type="com.autoask.entity.mysql.Card">
+        <result column="_card_id" jdbcType="BIGINT" property="id"/>
+        <result column="_card_card_id" jdbcType="VARCHAR" property="cardId"/>
+        <result column="_card_verify_code" jdbcType="VARCHAR" property="verifyCode"/>
+        <result column="_card_status" jdbcType="VARCHAR" property="status"/>
+        <result column="_card_card_type_id" jdbcType="VARCHAR" property="cardTypeId"/>
+        <result column="_card_use_time" jdbcType="TIMESTAMP" property="useTime"/>
+        <result column="_card_user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="_card_check_time" jdbcType="TIMESTAMP" property="checkTime"/>
+        <result column="_card_check_id" jdbcType="VARCHAR" property="checkId"/>
+        <result column="_card_delete_flag" jdbcType="BOOLEAN" property="deleteFlag"/>
+        <result column="_card_type_sort" jdbcType="BIGINT" property="typeSort"/>
+        <result column="_card_delete_time" jdbcType="TIMESTAMP" property="deleteTime"/>
+        <result column="_card_delete_id" jdbcType="VARCHAR" property="deleteId"/>
+        <result column="_card_order_goods_id" jdbcType="VARCHAR" property="orderGoodsId"/>
+        <result column="_order_id" jdbcType="VARCHAR" property="orderId"/>
+        <result column="_phone" jdbcType="VARCHAR" property="phone"/>
+        <association property="cardType" resultMap="com.autoask.mapper.CardTypeMapper.card_type_map"/>
+    </resultMap>
+
+    <select id="getCardDetailList" resultMap="card_map">
+        SELECT
+        <include refid="card_fields"></include>,
+        <include refid="com.autoask.mapper.CardTypeMapper.card_type_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsCardTypeMapper.goods_card_type_fields"></include>
+        FROM card
+        LEFT JOIN card_type ON card_type.card_type_id = card.card_type_id
+        LEFT JOIN goods_card_type ON goods_card_type.card_type_id = card_type.card_type_id
+        WHERE card.card_id in
+        <foreach item="item" index="index" collection="cardIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="updateCardToUse">
+        UPDATE card
+        SET status = #{status} , use_time = current_timestamp, order_goods_id = #{orderGoodsId}
+        WHERE card_id = #{cardId}
+    </update>
+
+    <update id="updateCardUsed">
+        UPDATE card
+        SET status = #{status} , use_time = current_timestamp
+        WHERE card_id in
+        <foreach item="item" index="index" collection="cardIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+
+    <update id="updateCardRest">
+        UPDATE card
+        SET status = "checked" , use_time = NULL, order_goods_id = NULL
+        WHERE card_id in
+        <foreach item="item" index="index" collection="cardIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+
+    <select id="getCardDetail" resultMap="card_map">
+        SELECT
+        <include refid="card_fields"></include>,
+        <include refid="com.autoask.mapper.CardTypeMapper.card_type_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsCardTypeMapper.goods_card_type_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsMapper.goods_fields"></include>
+        FROM card
+        LEFT JOIN card_type ON card_type.card_type_id = card.card_type_id
+        LEFT JOIN goods_card_type ON goods_card_type.card_type_id = card_type.card_type_id
+        LEFT JOIN goods ON goods.goods_id = goods_card_type.goods_id
+        WHERE card.card_id = #{cardId}
+    </select>
+
+    <select id="getCardIdsByType" resultType="java.lang.String">
+      SELECT card_id
+      FROM card
+      WHERE card_type_id = #{cardTypeId}
+    </select>
+
+    <select id="countCardNumByType" resultType="java.lang.Long">
+        SELECT
+        count(card.id)
+        FROM card
+        <where>
+            card.card_type_id = #{cardTypeId}
+            <if test="statusList != null and statusList.size() > 0">
+                AND card.status in
+                <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="cardId != null and cardId != ''">
+                AND card.card_id = #{cardId}
+            </if>
+            <if test="typeSort != null">
+                AND card.type_sort = #{typeSort}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="listCardByType" resultMap="use_map">
+        SELECT
+        <include refid="card_fields"></include>,
+        order_goods.order_id as _order_id,
+        user.phone as _phone
+        FROM card
+        LEFT JOIN order_goods ON order_goods.order_goods_id = card.order_goods_id
+        LEFT JOIN order_info ON order_goods.order_id = order_info.order_id
+        LEFT JOIN user ON order_info.user_id = user.user_id
+        <where>
+            card.card_type_id = #{cardTypeId}
+            <if test="statusList != null and statusList.size() > 0">
+                AND card.status in
+                <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="cardId != null and cardId != ''">
+                AND card.card_id = #{cardId}
+            </if>
+            <if test="typeSort != null">
+                AND card.type_sort = #{typeSort}
+            </if>
+        </where>
+        order by card.id asc
+        limit #{start},#{limit}
+    </select>
+
+	<select id="getBackCarIdList" resultMap="card_map">
+		select d.card_id as
+		_card_card_id from order_info i
+		LEFT JOIN order_goods g ON
+		g.order_id=i.order_id
+		LEFT JOIN order_goods_card c ON
+		c.order_goods_id=g.order_goods_id
+		LEFT JOIN card d ON
+		d.card_id=c.card_id
+		where UNIX_TIMESTAMP(i.create_time)&lt;=
+		UNIX_TIMESTAMP() - 7200 and
+		i.status='to_pay' and !ISNULL(d.card_id)
+		ORDER BY i.create_time
+	</select>
+
+	<update id="updateCardToUseAndStatus">
+		UPDATE card
+		SET status = #{status} , use_time = null,
+		user_id = null
+		WHERE card_id = #{cardId}
+	</update>
+
+	<select id="getCarIdList" resultType="java.util.HashMap">
+		select d.card_id,
+		g.discount_price
+		from order_info i
+		LEFT JOIN order_goods g ON g.order_id=i.order_id
+		LEFT JOIN order_goods_card
+		c ON c.order_goods_id=g.order_goods_id
+		LEFT JOIN card d ON
+		d.card_id=c.card_id
+		where !ISNULL(d.card_id) and i.order_id =
+		#{orderId}
+	</select>
+</mapper>

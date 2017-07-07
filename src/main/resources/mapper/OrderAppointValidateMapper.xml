@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.OrderAppointValidateMapper">
+    <resultMap id="order_appoint_validate_map" type="com.autoask.entity.mysql.OrderAppointValidate">
+        <result column="_order_appoint_validate_id" jdbcType="BIGINT" property="id"/>
+        <result column="_order_appoint_validate_order_id" jdbcType="VARCHAR" property="orderId"/>
+        <result column="_order_appoint_validate_user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="_order_appoint_validate_user_phone" jdbcType="VARCHAR" property="userPhone"/>
+        <result column="_order_appoint_validate_service_provider_id" jdbcType="VARCHAR" property="serviceProviderId"/>
+        <result column="_order_appoint_validate_code" jdbcType="VARCHAR" property="code"/>
+        <result column="_order_appoint_validate_validate_flag" jdbcType="BOOLEAN" property="validateFlag"/>
+        <result column="_order_appoint_validate_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_order_appoint_validate_validate_time" jdbcType="TIMESTAMP" property="validateTime"/>
+    </resultMap>
+
+    <sql id="order_appoint_validate_fields">
+        order_appoint_validate.id as _order_appoint_validate_id, order_appoint_validate.order_id as _order_appoint_validate_order_id, order_appoint_validate.user_id as _order_appoint_validate_user_id, order_appoint_validate.user_phone as _order_appoint_validate_user_phone, order_appoint_validate.service_provider_id as _order_appoint_validate_service_provider_id, order_appoint_validate.code as _order_appoint_validate_code, order_appoint_validate.validate_flag as _order_appoint_validate_validate_flag, order_appoint_validate.create_time as _order_appoint_validate_create_time, order_appoint_validate.validate_time as _order_appoint_validate_validate_time
+    </sql>
+
+    <select id="getByOrderId" resultMap="order_appoint_validate_map">
+        SELECT
+        <include refid="order_appoint_validate_fields"></include>
+        FROM order_appoint_validate
+        WHERE order_id = #{orderId};
+    </select>
+
+    <select id="getByCode" resultMap="order_appoint_validate_map">
+        SELECT
+        <include refid="order_appoint_validate_fields"></include>
+        FROM order_appoint_validate
+        WHERE service_provider_id = #{serviceProviderId}
+        AND code = #{code}
+    </select>
+
+    <update id="updateValidate">
+        UPDATE order_appoint_validate
+        SET validate_flag = TRUE ,validate_time = current_timestamp
+        WHERE order_id = #{orderId}
+    </update>
+
+</mapper>

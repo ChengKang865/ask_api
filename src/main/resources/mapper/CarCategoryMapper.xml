@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.CarCategoryMapper">
+    <resultMap id="BaseResultMap" type="com.autoask.entity.mysql.CarCategory">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="source_id" jdbcType="INTEGER" property="sourceId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="alias" jdbcType="VARCHAR" property="alias"/>
+        <result column="slug" jdbcType="VARCHAR" property="slug"/>
+        <result column="url" jdbcType="VARCHAR" property="url"/>
+        <result column="parent" jdbcType="VARCHAR" property="parent"/>
+        <result column="checker_runtime_id" jdbcType="INTEGER" property="checkerRuntimeId"/>
+        <result column="keywords" jdbcType="VARCHAR" property="keywords"/>
+        <result column="classified" jdbcType="VARCHAR" property="classified"/>
+        <result column="classified_url" jdbcType="VARCHAR" property="classifiedUrl"/>
+        <result column="slug_global" jdbcType="VARCHAR" property="slugGlobal"/>
+        <result column="logo_img" jdbcType="VARCHAR" property="logoImg"/>
+        <result column="mum" jdbcType="VARCHAR" property="mum"/>
+        <result column="first_letter" jdbcType="VARCHAR" property="firstLetter"/>
+        <result column="has_detail_model" jdbcType="INTEGER" property="hasDetailModel"/>
+        <result column="starting_price" jdbcType="DECIMAL" property="startingPrice"/>
+        <result column="classified_slug" jdbcType="VARCHAR" property="classifiedSlug"/>
+        <result column="thumbnail" jdbcType="VARCHAR" property="thumbnail"/>
+        <result column="pinyin" jdbcType="VARCHAR" property="pinyin"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="attribute" jdbcType="VARCHAR" property="attribute"/>
+        <result column="units" jdbcType="INTEGER" property="units"/>
+        <result column="popular" jdbcType="VARCHAR" property="popular"/>
+        <result column="on_sale" jdbcType="BIT" property="onSale"/>
+        <result column="score" jdbcType="INTEGER" property="score"/>
+        <result column="normalized_name" jdbcType="VARCHAR" property="normalizedName"/>
+        <result column="brand_area" jdbcType="VARCHAR" property="brandArea"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, source_id, name, alias, slug, url, parent, checker_runtime_id, keywords, classified,
+        classified_url, slug_global, logo_img, mum, first_letter, has_detail_model, starting_price,
+        classified_slug, thumbnail, pinyin, status, attribute, units, popular, on_sale, score,
+        normalized_name, brand_area
+    </sql>
+
+    <select id="selectCarCategories" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM car_category
+        WHERE
+        <choose>
+            <when test="parent !=null and parent != ''">
+                parent = #{parent}
+            </when>
+            <otherwise>
+                parent is NULL
+            </otherwise>
+        </choose>
+    </select>
+</mapper>

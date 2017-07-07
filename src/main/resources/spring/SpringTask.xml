@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <context:property-placeholder location="classpath:configuration/task.properties" ignore-unresolvable="true"/>
+
+    <!--<task:annotation-driven/>-->
+
+    <context:component-scan base-package="com.autoask.task"/>
+    <context:annotation-config/>
+
+    <!--ping++发红包定时任务-->
+    <bean id="pingppBonusJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+    <property name="beanName" value="pingppBonusTask"/>
+    <property name="jobClass" value="com.autoask.task.PingppBonusTask"></property>
+    <property name="durability" value="${pingpp.bonus.task.durability}"/>
+    </bean>
+
+    <bean id="pingppBonusCronTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+    <property name="jobDetail" ref="pingppBonusJob"></property>
+    <property name="cronExpression" value="${pingpp.bonus.cronExpression}"></property>
+    </bean>
+
+    <!-- 扫描异常的批量转账申请 -->
+    <bean id="extraApplyJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="beanName" value="extraApplyTask"/>
+        <property name="jobClass" value="com.autoask.task.ExtraApplyTask"></property>
+        <property name="durability" value="${extra.apply.task.durability}"/>
+    </bean>
+
+    <bean id="extraApplyCronTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="extraApplyJob"></property>
+        <property name="cronExpression" value="${extra.apply.task.cronExpression}"/>
+    </bean>
+    
+    <bean id="orderInfoJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+	    <property name="beanName" value="orderInfoTask"/>
+	    <property name="jobClass" value="com.autoask.task.OrderInfoTask"></property>
+	    <property name="durability" value="${order.apply.task.durability}"/>
+    </bean>
+    
+    <!-- 订单回滚 -->
+    <bean id="orderInfoJobCronTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+	    <property name="jobDetail" ref="orderInfoJob"></property>
+	    <property name="cronExpression" value="${order.apply.task.cronExpression}"></property>
+    </bean>
+
+    <bean id="trigger" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="extraApplyCronTriggerBean"/>
+                <ref bean="pingppBonusCronTriggerBean" />
+            </list>
+        </property>
+    </bean>
+    
+    <bean id="trigger2" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+            	<ref bean="orderInfoJobCronTriggerBean" />
+            </list>
+        </property>
+    </bean>
+</beans>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.CardTypeMapper">
+    <resultMap id="card_type_map" type="com.autoask.entity.mysql.CardType">
+        <result column="_card_type_id" jdbcType="BIGINT" property="id"/>
+        <result column="_card_type_card_type_id" jdbcType="VARCHAR" property="cardTypeId"/>
+        <result column="_card_type_name" jdbcType="VARCHAR" property="name"/>
+        <result column="_card_type_num" jdbcType="BIGINT" property="num"/>
+        <result column="_card_type_status" jdbcType="VARCHAR" property="status"/>
+        <result column="_card_type_factory_fee" jdbcType="DECIMAL" property="factoryFee"/>
+        <result column="_card_type_ad_fee" jdbcType="DECIMAL" property="adFee"/>
+        <result column="_card_type_handle_fee" jdbcType="DECIMAL" property="handleFee"/>
+        <result column="_card_type_promote_fee" jdbcType="DECIMAL" property="promoteFee"/>
+        <result column="_card_type_delete_flag" jdbcType="BOOLEAN" property="deleteFlag"/>
+        <result column="_card_type_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_card_type_expire_time" jdbcType="TIMESTAMP" property="expireTime"/>
+        <result column="_card_type_creator_id" jdbcType="VARCHAR" property="creatorId"/>
+        <result column="_card_type_modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="_card_type_modify_id" jdbcType="VARCHAR" property="modifyId"/>
+        <collection property="goodsCardTypeList"
+                    resultMap="com.autoask.mapper.GoodsCardTypeMapper.goods_card_type_map"/>
+    </resultMap>
+
+    <resultMap id="card_type_statistic_map" type="com.autoask.entity.info.CardTypeStatistic">
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="order_id" jdbcType="VARCHAR" property="orderId"/>
+        <result column="use_time" jdbcType="TIMESTAMP" property="useTime"/>
+        <result column="use_num" jdbcType="BIGINT" property="useNum"/>
+    </resultMap>
+
+    <sql id="card_type_fields">
+        card_type.id as _card_type_id, card_type.card_type_id as _card_type_card_type_id, card_type.name as _card_type_name, card_type.num as _card_type_num, card_type.status as _card_type_status, card_type.factory_fee as _card_type_factory_fee, card_type.ad_fee as _card_type_ad_fee, card_type.handle_fee as _card_type_handle_fee, card_type.promote_fee as _card_type_promote_fee, card_type.delete_flag as _card_type_delete_flag, card_type.create_time as _card_type_create_time, card_type.expire_time as _card_type_expire_time, card_type.creator_id as _card_type_creator_id, card_type.modify_time as _card_type_modify_time, card_type.modify_id as _card_type_modify_id
+    </sql>
+
+    <select id="countCardTypeNum" resultType="java.lang.Long">
+        SELECT count(DISTINCT card_type.id)
+        FROM card_type
+        LEFT JOIN goods_card_type ON goods_card_type.card_type_id = card_type.card_type_id
+        LEFT JOIN goods ON goods.goods_id = goods_card_type.goods_id
+        LEFT JOIN product ON product.product_id = goods.product_id
+        <where>
+            <if test="name != null and name !=''">
+                card_type.name LIKE CONCAT('%','${name}','%' )
+            </if>
+            <if test="goodsId != null and goodsId !=''">
+                AND goods.goods_id = #{goodsId}
+            </if>
+            <if test="productId != null and productId !=''">
+                AND product.product_id = #{productId}
+            </if>
+            <if test="productCategoryId != null and productCategoryId !=''">
+                AND product.product_category_id = #{productCategoryId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getGoodsTypeIds" resultType="java.lang.String">
+        SELECT DISTINCT card_type.card_type_id
+        FROM card_type
+        LEFT JOIN goods_card_type ON goods_card_type.card_type_id = card_type.card_type_id
+        LEFT JOIN goods ON goods.goods_id = goods_card_type.goods_id
+        LEFT JOIN product ON product.product_id = goods.product_id
+        <where>
+            <if test="name != null and name !=''">
+                card_type.name LIKE CONCAT('%','${name}','%' )
+            </if>
+            <if test="goodsId != null and goodsId !=''">
+                AND goods.goods_id = #{goodsId}
+            </if>
+            <if test="productId != null and productId !=''">
+                AND product.product_id = #{productId}
+            </if>
+            <if test="productCategoryId != null and productCategoryId !=''">
+                AND product.product_category_id = #{productCategoryId}
+            </if>
+        </where>
+        ORDER BY card_type.create_time DESC
+        LIMIT #{start},#{limit};
+    </select>
+
+    <select id="getGoodsTypeList" resultMap="card_type_map">
+        SELECT
+        <include refid="card_type_fields"/>,
+        <include refid="com.autoask.mapper.GoodsCardTypeMapper.goods_card_type_fields"/>,
+        <include refid="com.autoask.mapper.GoodsMapper.goods_fields"/>
+        FROM card_type
+        LEFT JOIN goods_card_type on goods_card_type.card_type_id = card_type.card_type_id
+        LEFT JOIN goods on goods.goods_id = goods_card_type.goods_id
+        WHERE
+        card_type.card_type_id in
+        <foreach item="item" index="index" collection="cardTypeIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        order by card_type.create_time desc;
+    </select>
+
+    <select id="getUseNumList" resultType="java.util.Map">
+        SELECT
+        card_type_id as cardTypeId,
+        count(id) as useNum
+        FROM card
+        WHERE card.status = "used" AND card_type_id IN
+        <foreach item="item" index="index" collection="cardTypeIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        GROUP BY card_type_id;
+    </select>
+
+    <select id="countCardTypeStatistic" resultType="java.lang.Long">
+        SELECT count(DISTINCT order_goods.order_id) AS total_num
+        FROM card_type
+          LEFT JOIN card ON card_type.card_type_id = card.card_type_id
+          LEFT JOIN order_goods on order_goods.order_goods_id = card.order_goods_id
+        WHERE card_type.card_type_id = #{cardTypeId} AND card.status = "used"
+    </select>
+
+
+    <select id="getCardTypeStatisticList" resultMap="card_type_statistic_map">
+        SELECT
+        order_goods.order_id AS order_id,
+        user.phone AS phone,
+        user.user_id AS user_id,
+        card.use_time AS use_time,
+        count(DISTINCT card.id) AS use_num
+        FROM card_type
+        LEFT JOIN card ON card_type.card_type_id = card.card_type_id
+        LEFT JOIN order_goods ON order_goods.order_goods_id = card.order_goods_id
+        LEFT JOIN order_info ON order_info.order_id = order_goods.order_id
+        LEFT JOIN user ON user.user_id = order_info.user_id
+        WHERE card_type.card_type_id = #{cardTypeId}  AND card.status = "used"
+        GROUP BY order_goods.order_id
+        order by card.use_time desc
+        limit #{start},#{limit}
+    </select>
+
+    <select id="getCardTypeDetail" resultMap="card_type_map">
+        SELECT
+        <include refid="card_type_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsCardTypeMapper.goods_card_type_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsMapper.goods_fields"></include>
+        FROM card_type
+        LEFT JOIN goods_card_type on goods_card_type.card_type_id = card_type.card_type_id
+        LEFT JOIN goods on goods.goods_id = goods_card_type.goods_id
+        WHERE card_type.card_type_id = #{cardTypeId}
+    </select>
+
+</mapper>

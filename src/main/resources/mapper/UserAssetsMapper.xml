@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.UserAssetsMapper">
+    <resultMap id="user_assets_map" type="com.autoask.entity.mysql.UserAssets">
+        <result column="_user_assets_user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="_user_assets_id" jdbcType="BIGINT" property="id"/>
+        <result column="_user_assets_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_user_assets_balance" jdbcType="DECIMAL" property="balance"/>
+        <result column="_user_assets_modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="integration" jdbcType="BIGINT" property="integration"/>
+        <result column="version" jdbcType="BIGINT" property="version"/>
+    </resultMap>
+    <sql id="user_assets_fields">
+        user_assets.user_id as _user_assets_user_id, user_assets.id as _user_assets_id, user_assets.create_time as
+        _user_assets_create_time, user_assets.balance as _user_assets_balance, user_assets.modify_time as
+        _user_assets_modify_time, integration, version
+    </sql>
+
+    <select id="selectForLock" resultMap="user_assets_map">
+        SELECT
+        <include refid="user_assets_fields"/>
+        FROM user_assets
+        WHERE user_id = #{userId}
+        FOR UPDATE;
+    </select>
+
+    <update id="updateBalance">
+      UPDATE user_assets
+        SET balance = balance + #{changeAmount}, modify_time = current_timestamp, version = version + 1
+        WHERE user_id = #{userId};
+    </update>
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.UserAssetsRecordMapper">
+    <resultMap id="user_assets_record_map" type="com.autoask.entity.mysql.UserAssetsRecord">
+        <result column="_user_assets_record_related_id" jdbcType="VARCHAR" property="relatedId"/>
+        <result column="_user_assets_record_user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="_user_assets_record_now_amount" jdbcType="DECIMAL" property="nowAmount"/>
+        <result column="_user_assets_record_related_type" jdbcType="VARCHAR" property="relatedType"/>
+        <result column="_user_assets_record_id" jdbcType="BIGINT" property="id"/>
+        <result column="_user_assets_record_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_user_assets_record_pre_amount" jdbcType="DECIMAL" property="preAmount"/>
+        <result column="_user_assets_record_record_id" jdbcType="VARCHAR" property="recordId"/>
+        <result column="_user_assets_record_change_amount" jdbcType="DECIMAL" property="changeAmount"/>
+    </resultMap>
+    <sql id="user_assets_record_fields">
+        user_assets_record.related_id as _user_assets_record_related_id, user_assets_record.user_id as _user_assets_record_user_id, user_assets_record.now_amount as _user_assets_record_now_amount, user_assets_record.related_type as _user_assets_record_related_type, user_assets_record.id as _user_assets_record_id, user_assets_record.create_time as _user_assets_record_create_time, user_assets_record.pre_amount as _user_assets_record_pre_amount, user_assets_record.record_id as _user_assets_record_record_id, user_assets_record.change_amount as _user_assets_record_change_amount
+    </sql>
+
+</mapper>

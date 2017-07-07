@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.autoask.mapper.ShoppingCartGoodsMapper" >
+  <resultMap id="BaseResultMap" type="com.autoask.entity.mysql.ShoppingCartGoods" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="goods_snapshot_id" property="goodsSnapshotId" jdbcType="VARCHAR" />
+    <result column="shopping_cart_goods_id" property="shoppingCartGoodsId" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="last_update_time" property="lastUpdateTime" jdbcType="TIMESTAMP" />
+    <result column="delete_flag" property="deleteFlag" jdbcType="BOOLEAN" />
+    <result column="delete_time" property="deleteTime" jdbcType="TIMESTAMP" />
+    <result column="shopping_cart_num" property="shoppingCartNum" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, goods_snapshot_id, shopping_cart_goods_id, create_time, last_update_time, 
+    delete_flag, delete_time, shopping_cart_num
+  </sql>
+  <select id="selectShoppingCardGoodsList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM shopping_cart_goods where 1=1
+            <if test="userId != null and userId != ''">
+                AND user_id = #{userId}
+            </if>
+            <if test="deleteFlag == true">
+                AND delete_flag = 1
+            </if>
+            <if test="deleteFlag == false">
+                AND delete_flag = 0
+            </if>
+    </select>
+    
+    <select id="selectShoppingCardGoodsCount" resultType="java.lang.Long">
+		SELECT COALESCE(SUM(shopping_cart_num),0)
+        FROM shopping_cart_goods where 1=1
+            <if test="userId != null and userId != ''">
+                AND user_id = #{userId}
+            </if>
+            <if test="deleteFlag == true">
+                AND delete_flag = 1
+            </if>
+            <if test="deleteFlag == false">
+                AND delete_flag = 0
+            </if>
+	</select>
+    
+	<select id="selectShoppingCartGoodsById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM shopping_cart_goods where shopping_cart_goods_id = #{shoppingCartGoodsId} AND delete_flag = 0
+    </select>
+    
+    <update id="updateShopingCardGoods">
+        UPDATE shopping_cart_goods
+        SET shopping_cart_num = #{shoppingCartNum}, last_update_time = #{lastUpdateTime}
+        WHERE shopping_cart_goods_id = #{shoppingCartGoodsId}
+    </update>
+    
+    <select id="selectGoodsSnapshotById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM shopping_cart_goods where goods_snapshot_id = #{goodsSnapshotId} AND user_id = #{userId} AND delete_flag = 0
+    </select>
+</mapper>

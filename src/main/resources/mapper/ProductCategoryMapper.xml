@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.ProductCategoryMapper">
+    <resultMap id="product_category_map" type="com.autoask.entity.mysql.ProductCategory">
+        <result column="_product_category_id" jdbcType="BIGINT" property="id"/>
+        <result column="_product_category_product_category_id" jdbcType="VARCHAR" property="productCategoryId"/>
+        <result column="_product_category_name" jdbcType="VARCHAR" property="name"/>
+        <result column="_product_category_name_en" jdbcType="VARCHAR" property="nameEn"/>
+        <result column="_product_category_logo_url" jdbcType="VARCHAR" property="logoUrl"/>
+        <result column="_product_category_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_product_category_creator_id" jdbcType="VARCHAR" property="creatorId"/>
+        <result column="_product_category_modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="_product_category_modify_id" jdbcType="VARCHAR" property="modifyId"/>
+        <result column="_product_category_delete_flag" jdbcType="BOOLEAN" property="deleteFlag"/>
+        <result column="_product_category_service_fee" jdbcType="DECIMAL" property="serviceFee"/>
+        <collection property="productList" ofType="com.autoask.entity.mysql.Product"
+                    resultMap="com.autoask.mapper.ProductMapper.product_map"/>
+    </resultMap>
+
+    <sql id="product_category_fields">product_category.id as _product_category_id, product_category.product_category_id as _product_category_product_category_id, product_category.name as _product_category_name, product_category.name_en as _product_category_name_en, product_category.logo_url as _product_category_logo_url, product_category.create_time as _product_category_create_time, product_category.creator_id as _product_category_creator_id, product_category.modify_time as _product_category_modify_time, product_category.modify_id as _product_category_modify_id, product_category.delete_flag as _product_category_delete_flag, product_category.service_fee as _product_category_service_fee</sql>
+
+    <select id="getProductCategoryList" resultMap="product_category_map">
+        SELECT
+        <include refid="product_category_fields"></include>,
+        <include refid="com.autoask.mapper.ProductMapper.product_fields"></include>
+        from product_category
+        LEFT JOIN product
+        ON product_category.product_category_id = product.product_category_id
+        WHERE product_category.delete_flag = 0 and (product.delete_flag = 0 or product.delete_flag is NULL )
+        ORDER BY product_category.modify_time DESC ,product.modify_time DESC;
+    </select>
+</mapper>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.GoodsSnapshotMapper">
+    <resultMap id="goods_snapshot_map" type="com.autoask.entity.mysql.GoodsSnapshot">
+        <result column="_goods_snapshot_id" jdbcType="BIGINT" property="id"/>
+        <result column="_goods_snapshot_goods_snapshot_id" jdbcType="VARCHAR" property="goodsSnapshotId"/>
+        <result column="_goods_snapshot_goods_id" jdbcType="VARCHAR" property="goodsId"/>
+        <result column="_goods_snapshot_product_id" jdbcType="VARCHAR" property="productId"/>
+        <result column="_goods_snapshot_name" jdbcType="VARCHAR" property="name"/>
+        <result column="_goods_snapshot_name_en" jdbcType="VARCHAR" property="nameEn"/>
+        <result column="_goods_snapshot_popular_rank" jdbcType="INTEGER" property="popularRank"/>
+        <result column="_goods_snapshot_online_price" jdbcType="DECIMAL" property="onlinePrice"/>
+        <result column="_goods_snapshot_offline_price" jdbcType="DECIMAL" property="offlinePrice"/>
+        <result column="_goods_snapshot_type" jdbcType="VARCHAR" property="type"/>
+        <result column="_goods_snapshot_status" jdbcType="VARCHAR" property="status"/>
+        <result column="_goods_snapshot_factory_id" jdbcType="VARCHAR" property="factoryId"/>
+        <result column="_goods_snapshot_factory_fee" jdbcType="DECIMAL" property="factoryFee"/>
+        <result column="_goods_snapshot_ad_fee" jdbcType="DECIMAL" property="adFee"/>
+        <result column="_goods_snapshot_handle_fee" jdbcType="DECIMAL" property="handleFee"/>
+        <result column="_goods_snapshot_promote_fee" jdbcType="DECIMAL" property="promoteFee"/>
+        <result column="_goods_snapshot_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_goods_snapshot_creator_id" jdbcType="VARCHAR" property="creatorId"/>
+        <result column="_goods_snapshot_modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="_goods_snapshot_modify_id" jdbcType="VARCHAR" property="modifyId"/>
+        <result column="_goods_snapshot_check_time" jdbcType="TIMESTAMP" property="checkTime"/>
+        <result column="_goods_snapshot_check_id" jdbcType="VARCHAR" property="checkId"/>
+        <result column="_goods_snapshot_delete_flag" jdbcType="BOOLEAN" property="deleteFlag"/>
+        <result column="_goods_snapshot_snapshot_check_status" jdbcType="VARCHAR" property="snapshotCheckStatus"/>
+        <result column="_goods_snapshot_snapshot_create_time" jdbcType="TIMESTAMP" property="snapshotCreateTime"/>
+        <result column="_goods_snapshot_weight" jdbcType="DECIMAL" property="weight"/>
+        <association property="product" resultMap="com.autoask.mapper.ProductMapper.product_map"/>
+        <collection property="goodsSnapshotInfoList" ofType="GoodsSnapshotInfo"
+                    resultMap="com.autoask.mapper.GoodsSnapshotInfoMapper.goods_snapshot_info_map"></collection>
+    </resultMap>
+
+    <sql id="goods_snapshot_fields">
+        goods_snapshot.id as _goods_snapshot_id, goods_snapshot.goods_snapshot_id as _goods_snapshot_goods_snapshot_id, goods_snapshot.goods_id as _goods_snapshot_goods_id, goods_snapshot.product_id as _goods_snapshot_product_id, goods_snapshot.name as _goods_snapshot_name, goods_snapshot.name_en as _goods_snapshot_name_en, goods_snapshot.popular_rank as _goods_snapshot_popular_rank, goods_snapshot.online_price as _goods_snapshot_online_price, goods_snapshot.offline_price as _goods_snapshot_offline_price, goods_snapshot.type as _goods_snapshot_type, goods_snapshot.status as _goods_snapshot_status, goods_snapshot.factory_id as _goods_snapshot_factory_id, goods_snapshot.factory_fee as _goods_snapshot_factory_fee, goods_snapshot.ad_fee as _goods_snapshot_ad_fee, goods_snapshot.handle_fee as _goods_snapshot_handle_fee, goods_snapshot.promote_fee as _goods_snapshot_promote_fee, goods_snapshot.create_time as _goods_snapshot_create_time, goods_snapshot.creator_id as _goods_snapshot_creator_id, goods_snapshot.modify_time as _goods_snapshot_modify_time, goods_snapshot.modify_id as _goods_snapshot_modify_id, goods_snapshot.check_time as _goods_snapshot_check_time, goods_snapshot.check_id as _goods_snapshot_check_id, goods_snapshot.delete_flag as _goods_snapshot_delete_flag, goods_snapshot.snapshot_check_status as _goods_snapshot_snapshot_check_status, goods_snapshot.snapshot_create_time as _goods_snapshot_snapshot_create_time, goods_snapshot.weight as _goods_snapshot_weight
+    </sql>
+
+</mapper>

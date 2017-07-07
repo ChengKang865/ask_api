@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.autoask.mapper.OrderShareMapper">
+    <resultMap id="order_share_map" type="com.autoask.entity.mysql.OrderShare">
+        <result column="_order_share_id" jdbcType="BIGINT" property="id"/>
+        <result column="_order_share_order_id" jdbcType="VARCHAR" property="orderId"/>
+        <result column="_order_share_ad_fee" jdbcType="DECIMAL" property="adFee"/>
+        <result column="_order_share_ad_type" jdbcType="VARCHAR" property="adType"/>
+        <result column="_order_share_ad_id" jdbcType="VARCHAR" property="adId"/>
+        <result column="_order_share_service_fee" jdbcType="DECIMAL" property="serviceFee"/>
+        <result column="_order_share_service_type" jdbcType="VARCHAR" property="serviceType"/>
+        <result column="_order_share_service_id" jdbcType="VARCHAR" property="serviceId"/>
+        <result column="_order_share_handle_fee" jdbcType="DECIMAL" property="handleFee"/>
+        <result column="_order_share_handle_id" jdbcType="VARCHAR" property="handleId"/>
+        <result column="_order_share_promote_fee" jdbcType="DECIMAL" property="promoteFee"/>
+        <result column="_order_share_promote_type" jdbcType="VARCHAR" property="promoteType"/>
+        <result column="_order_share_promote_id" jdbcType="VARCHAR" property="promoteId"/>
+        <result column="_order_share_factory_fee" jdbcType="DECIMAL" property="factoryFee"/>
+        <result column="_order_share_factory_id" jdbcType="VARCHAR" property="factoryId"/>
+        <result column="_order_share_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_order_share_origin_ad_fee" jdbcType="DECIMAL" property="originAdFee"/>
+        <result column="_order_share_origin_service_fee" jdbcType="DECIMAL" property="originServiceFee"/>
+    </resultMap>
+
+
+    <sql id="order_share_fields">
+        order_share.id as _order_share_id, order_share.order_id as _order_share_order_id, order_share.ad_fee as _order_share_ad_fee, order_share.ad_type as _order_share_ad_type, order_share.ad_id as _order_share_ad_id, order_share.service_fee as _order_share_service_fee, order_share.service_type as _order_share_service_type, order_share.service_id as _order_share_service_id, order_share.handle_fee as _order_share_handle_fee, order_share.handle_id as _order_share_handle_id, order_share.promote_fee as _order_share_promote_fee, order_share.promote_type as _order_share_promote_type, order_share.promote_id as _order_share_promote_id, order_share.factory_fee as _order_share_factory_fee, order_share.factory_id as _order_share_factory_id, order_share.create_time as _order_share_create_time, order_share.origin_ad_fee as _order_share_origin_ad_fee, order_share.origin_service_fee as _order_share_origin_service_fee
+    </sql>
+
+    <select id="getOrderShareByOrderId" resultMap="order_share_map">
+        SELECT
+        <include refid="order_share_fields"></include>
+        FROM order_share
+        WHERE order_id = #{orderId}
+    </select>
+
+    <update id="updateOrderShareNoServiceProvider">
+        UPDATE order_share
+        SET service_id = NULL, service_type = NULL, service_fee = 0.00, ad_type = NULL, ad_id = NULL, ad_fee = 0.00, origin_ad_fee = 0.00, origin_service_fee = 0.00
+        WHERE order_id = #{orderId}
+    </update>
+
+</mapper>

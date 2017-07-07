@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.GoodsMapper">
+    <resultMap id="goods_map" type="com.autoask.entity.mysql.Goods">
+        <result column="_goods_id" jdbcType="BIGINT" property="id"/>
+        <result column="_goods_goods_id" jdbcType="VARCHAR" property="goodsId"/>
+        <result column="_goods_goods_snapshot_id" jdbcType="VARCHAR" property="goodsSnapshotId"/>
+        <result column="_goods_product_id" jdbcType="VARCHAR" property="productId"/>
+        <result column="_goods_name" jdbcType="VARCHAR" property="name"/>
+        <result column="_goods_name_en" jdbcType="VARCHAR" property="nameEn"/>
+        <result column="_goods_popular_rank" jdbcType="INTEGER" property="popularRank"/>
+        <result column="_goods_online_price" jdbcType="DECIMAL" property="onlinePrice"/>
+        <result column="_goods_offline_price" jdbcType="DECIMAL" property="offlinePrice"/>
+        <result column="_goods_type" jdbcType="VARCHAR" property="type"/>
+        <result column="_goods_status" jdbcType="VARCHAR" property="status"/>
+        <result column="_goods_factory_id" jdbcType="VARCHAR" property="factoryId"/>
+        <result column="_goods_factory_fee" jdbcType="DECIMAL" property="factoryFee"/>
+        <result column="_goods_ad_fee" jdbcType="DECIMAL" property="adFee"/>
+        <result column="_goods_handle_fee" jdbcType="DECIMAL" property="handleFee"/>
+        <result column="_goods_promote_fee" jdbcType="DECIMAL" property="promoteFee"/>
+        <result column="_goods_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_goods_creator_id" jdbcType="VARCHAR" property="creatorId"/>
+        <result column="_goods_modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="_goods_modify_id" jdbcType="VARCHAR" property="modifyId"/>
+        <result column="_goods_check_time" jdbcType="TIMESTAMP" property="checkTime"/>
+        <result column="_goods_check_id" jdbcType="VARCHAR" property="checkId"/>
+        <result column="_goods_delete_flag" jdbcType="BOOLEAN" property="deleteFlag"/>
+        <result column="_goods_sale_flag" jdbcType="BOOLEAN" property="saleFlag"/>
+        <result column="_goods_check_snapshot_id" jdbcType="VARCHAR" property="checkSnapshotId"/>
+        <result column="_goods_weight" jdbcType="DECIMAL" property="weight"/>
+        <association property="product" resultMap="com.autoask.mapper.ProductMapper.product_map"/>
+    </resultMap>
+
+    <sql id="goods_fields">
+        goods.id as _goods_id, goods.goods_id as _goods_goods_id, goods.goods_snapshot_id as _goods_goods_snapshot_id, goods.product_id as _goods_product_id, goods.name as _goods_name, goods.name_en as _goods_name_en, goods.popular_rank as _goods_popular_rank, goods.online_price as _goods_online_price, goods.offline_price as _goods_offline_price, goods.type as _goods_type, goods.status as _goods_status, goods.factory_id as _goods_factory_id, goods.factory_fee as _goods_factory_fee, goods.ad_fee as _goods_ad_fee, goods.handle_fee as _goods_handle_fee, goods.promote_fee as _goods_promote_fee, goods.create_time as _goods_create_time, goods.creator_id as _goods_creator_id, goods.modify_time as _goods_modify_time, goods.modify_id as _goods_modify_id, goods.check_time as _goods_check_time, goods.check_id as _goods_check_id, goods.delete_flag as _goods_delete_flag, goods.sale_flag as _goods_sale_flag, goods.check_snapshot_id as _goods_check_snapshot_id, goods.weight as _goods_weight
+    </sql>
+
+    <resultMap id="goods_join_mapper" type="com.autoask.entity.mysql.Goods">
+        <result column="_goods_id" jdbcType="BIGINT" property="id"/>
+        <result column="_goods_goods_id" jdbcType="VARCHAR" property="goodsId"/>
+        <result column="_goods_goods_snapshot_id" jdbcType="VARCHAR" property="goodsSnapshotId"/>
+        <result column="_goods_product_id" jdbcType="VARCHAR" property="productId"/>
+        <result column="_goods_name" jdbcType="VARCHAR" property="name"/>
+        <result column="_goods_name_en" jdbcType="VARCHAR" property="nameEn"/>
+        <result column="_goods_popular_rank" jdbcType="INTEGER" property="popularRank"/>
+        <result column="_goods_online_price" jdbcType="DECIMAL" property="onlinePrice"/>
+        <result column="_goods_offline_price" jdbcType="DECIMAL" property="offlinePrice"/>
+        <result column="_goods_type" jdbcType="VARCHAR" property="type"/>
+        <result column="_goods_status" jdbcType="VARCHAR" property="status"/>
+        <result column="_goods_factory_id" jdbcType="VARCHAR" property="factoryId"/>
+        <result column="_goods_factory_fee" jdbcType="DECIMAL" property="factoryFee"/>
+        <result column="_goods_ad_fee" jdbcType="DECIMAL" property="adFee"/>
+        <result column="_goods_handle_fee" jdbcType="DECIMAL" property="handleFee"/>
+        <result column="_goods_promote_fee" jdbcType="DECIMAL" property="promoteFee"/>
+        <result column="_goods_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_goods_creator_id" jdbcType="VARCHAR" property="creatorId"/>
+        <result column="_goods_modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="_goods_modify_id" jdbcType="VARCHAR" property="modifyId"/>
+        <result column="_goods_check_time" jdbcType="TIMESTAMP" property="checkTime"/>
+        <result column="_goods_check_id" jdbcType="VARCHAR" property="checkId"/>
+        <result column="_goods_delete_flag" jdbcType="BOOLEAN" property="deleteFlag"/>
+        <result column="_goods_sale_flag" jdbcType="BOOLEAN" property="saleFlag"/>
+        <result column="_goods_check_snapshot_id" jdbcType="VARCHAR" property="checkSnapshotId"/>
+        <result column="_goods_weight" jdbcType="DECIMAL" property="weight"/>
+        <association property="goodsSnapshot" resultMap="com.autoask.mapper.GoodsSnapshotMapper.goods_snapshot_map"/>
+    </resultMap>
+
+    <select id="getGoodsList" parameterType="list" resultMap="goods_join_mapper">
+        SELECT<include refid="goods_fields"/>,<include refid="com.autoask.mapper.ProductMapper.product_fields"/>,
+        <include refid="com.autoask.mapper.GoodsInfoMapper.goods_info_fields"/>
+        FROM product
+        LEFT JOIN goods ON product.product_id = goods.id
+        LEFT JOIN goods_info ON goods.goods_id = goods_info.goods_id
+        <where>
+            <if test="productName !=null ">
+                product.name = #{productName}
+            </if>
+            <if test="#creatorId !=null ">
+                and goods.creator_id = #{creatorId}
+            </if>
+        </where>
+    </select>
+
+    <!--查询产品线上最低价的商品价格-->
+    <select id="getMinOnlineProductGoodsPrice" resultType="double">
+        SELECT CASE
+        WHEN min(online_price) IS NULL
+        THEN 0.0
+        ELSE min(online_price)
+        END AS price
+        FROM goods
+        <where>
+            <if test="productId != null">
+                product_id = #{productId}
+            </if>
+            AND status='checked'
+            AND delete_flag = 0
+        </where>
+    </select>
+
+    <!--查询产品线下最低价的商品价格-->
+    <select id="getMinOfflineProductGoodsPrice" resultType="double">
+        SELECT CASE
+        WHEN min(offline_price) IS NULL
+        THEN 0.0
+        ELSE min(offline_price)
+        END AS price
+        FROM goods
+        <where>
+            <if test="productId != null">
+                product_id = #{productId}
+            </if>
+            AND status='checked'
+            AND delete_flag = 0
+        </where>
+    </select>
+
+    <!--根据 productId 获取在售的商品总数-->
+    <select id="getOnSellGoodsCountByProductId" resultType="integer">
+        SELECT count(1)
+        FROM goods
+        <where>
+            <if test="productId != null">
+                product_id = #{productId}
+            </if>
+            AND status='checked'
+            AND delete_flag = 0
+        </where>
+    </select>
+    <select id="getGoodsInfoByProductId" resultMap="goods_join_mapper">
+        SELECT
+        <include refid="goods_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsSnapshotMapper.goods_snapshot_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsSnapshotInfoMapper.goods_snapshot_info_fields"></include>
+        FROM goods
+        LEFT JOIN goods_snapshot ON goods.goods_snapshot_id = goods_snapshot.goods_snapshot_id
+        LEFT JOIN goods_snapshot_info ON goods_snapshot.goods_snapshot_id = goods_snapshot_info.goods_snapshot_id
+        WHERE goods.product_id = #{productId} AND goods.delete_flag = 0 AND goods.sale_flag = 1;
+    </select>
+
+    <select id="getAllGoodsList" resultMap="goods_join_mapper">
+        SELECT
+        <include refid="goods_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsSnapshotMapper.goods_snapshot_fields"></include>,
+        <include refid="com.autoask.mapper.GoodsSnapshotInfoMapper.goods_snapshot_info_fields"></include>
+        FROM goods
+        LEFT JOIN goods_snapshot ON goods.goods_snapshot_id = goods_snapshot.goods_snapshot_id
+        LEFT JOIN goods_snapshot_info ON goods_snapshot.goods_snapshot_id = goods_snapshot_info.goods_snapshot_id
+        WHERE goods.product_id = #{productId} AND goods.delete_flag = 0;
+    </select>
+
+
+    <select id="getGoodsIdList" resultType="java.lang.String">
+        SELECT goods.goods_id
+        FROM goods
+        LEFT JOIN product ON goods.product_id = product.product_id
+        <where>
+            <if test="goodsId != null and goodsId !=''">
+                AND goods.goods_id = #{goodsId}
+            </if>
+            <if test="productId != null and productId !=''">
+                AND goods.product_id = #{productId}
+            </if>
+            <if test="productCategoryId != null and productCategoryId !=''">
+                AND product.product_category_id = #{productCategoryId}
+            </if>
+            <if test="goodsName != null and goodsName !=''">
+                AND goods.name LIKE CONCAT('%','${goodsName}','%' )
+            </if>
+        </where>
+    </select>
+
+    <select id="getToCheckGoodsNum" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM
+          goods
+        WHERE goods.delete_flag = 0 AND (goods.check_snapshot_id != goods.goods_snapshot_id)
+    </select>
+
+
+</mapper>

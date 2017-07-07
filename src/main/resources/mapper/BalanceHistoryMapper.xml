@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.BalanceHistoryMapper">
+    <resultMap id="balance_history_map" type="com.autoask.entity.mysql.BalanceHistory">
+        <result column="_balance_history_user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="_balance_history_change_amount" jdbcType="DECIMAL" property="changeAmount"/>
+        <result column="_balance_history_type" jdbcType="VARCHAR" property="type"/>
+        <result column="_balance_history_extra_id" jdbcType="VARCHAR" property="extraId"/>
+        <result column="_balance_history_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_balance_history_pre_amount" jdbcType="DECIMAL" property="preAmount"/>
+        <result column="_balance_history_id" jdbcType="BIGINT" property="id"/>
+        <result column="balance_history_id" jdbcType="VARCHAR" property="balanceHistoryId"/>
+        <result column="current_amount" jdbcType="DECIMAL" property="currentAmount"/>
+    </resultMap>
+    <sql id="balance_history_fields">
+        balance_history.user_id as _balance_history_user_id, balance_history.change_amount as _balance_history_change_amount, balance_history.type as _balance_history_type, balance_history.extra_id as _balance_history_extra_id, balance_history.create_time as _balance_history_create_time, balance_history.pre_amount as _balance_history_pre_amount, balance_history.id as _balance_history_id, balance_history_id, current_amount
+    </sql>
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.OrderServeMapper">
+    <resultMap id="order_serve_map" type="com.autoask.entity.mysql.OrderServe">
+        <result column="_order_serve_id" jdbcType="BIGINT" property="id"/>
+        <result column="_order_serve_order_id" jdbcType="VARCHAR" property="orderId"/>
+        <result column="_order_serve_mechanic_id" jdbcType="VARCHAR" property="mechanicId"/>
+        <result column="_order_serve_service_provider_id" jdbcType="VARCHAR" property="serviceProviderId"/>
+        <result column="_order_serve_service_provider_pre_share" jdbcType="DECIMAL" property="serviceProviderPreShare"/>
+        <result column="_order_serve_rate" jdbcType="SMALLINT" property="rate"/>
+        <association property="orderAppointValidate"
+                     resultMap="com.autoask.mapper.OrderAppointValidateMapper.order_appoint_validate_map"/>
+    </resultMap>
+
+    <sql id="order_serve_fields">
+        order_serve.id as _order_serve_id, order_serve.order_id as _order_serve_order_id, order_serve.mechanic_id as _order_serve_mechanic_id, order_serve.service_provider_id as _order_serve_service_provider_id, order_serve.service_provider_pre_share as _order_serve_service_provider_pre_share, order_serve.rate as _order_serve_rate
+    </sql>
+
+    <update id="updateMechanicId">
+        UPDATE order_serve
+        SET mechanic_id = #{mechanicId}
+        WHERE order_id = #{orderId}
+    </update>
+
+    <update id="updateOrderServeMerchant">
+        UPDATE order_serve
+        SET check_merchant_type = #{checkMerchantType}
+        WHERE order_id = #{orderId};
+    </update>
+    <update id="updateOrderServeNoPartner">
+        UPDATE order_serve
+        SET check_merchant_type = #{checkMerchantType},partner_pre_share = #{partnerPreShare}
+        WHERE order_id = #{orderId};
+    </update>
+</mapper>

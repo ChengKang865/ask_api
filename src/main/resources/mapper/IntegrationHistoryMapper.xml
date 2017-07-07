@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.IntegrationHistoryMapper">
+    <resultMap id="integration_history_map" type="com.autoask.entity.mysql.IntegrationHistory">
+        <result column="_integration_history_user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="_integration_history_extra_id" jdbcType="VARCHAR" property="extraId"/>
+        <result column="_integration_history_change_amount" jdbcType="BIGINT" property="changeAmount"/>
+        <result column="_integration_history_id" jdbcType="BIGINT" property="id"/>
+        <result column="_integration_history_type" jdbcType="VARCHAR" property="type"/>
+        <result column="_integration_history_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="pre_integration" jdbcType="BIGINT" property="preIntegration"/>
+        <result column="current_integration" jdbcType="BIGINT" property="currentIntegration"/>
+        <result column="integration_history_id" jdbcType="VARCHAR" property="integrationHistoryId"/>
+    </resultMap>
+    <sql id="integration_history_fields">
+        integration_history.user_id as _integration_history_user_id, integration_history.extra_id as
+        _integration_history_extra_id, integration_history.change_amount as _integration_history_change_amount,
+        integration_history.id as _integration_history_id, integration_history.type as _integration_history_type,
+        integration_history.create_time as _integration_history_create_time, pre_integration, current_integration,
+        integration_history_id
+    </sql>
+</mapper>

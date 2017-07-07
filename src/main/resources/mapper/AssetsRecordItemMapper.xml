@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.autoask.mapper.AssetsRecordItemMapper">
+    <resultMap id="assets_record_item_map" type="com.autoask.entity.mysql.AssetsRecordItem">
+        <result column="_assets_record_item_id" jdbcType="BIGINT" property="id"/>
+        <result column="_assets_record_item_record_item_id" jdbcType="VARCHAR" property="recordItemId"/>
+        <result column="_assets_record_item_record_id" jdbcType="VARCHAR" property="recordId"/>
+        <result column="_assets_record_item_amount" jdbcType="DECIMAL" property="amount"/>
+        <result column="_assets_record_item_income_type" jdbcType="VARCHAR" property="incomeType"/>
+    </resultMap>
+
+    <sql id="assets_record_item_fields">
+        assets_record_item.id as _assets_record_item_id, assets_record_item.record_item_id as _assets_record_item_record_item_id, assets_record_item.record_id as _assets_record_item_record_id, assets_record_item.amount as _assets_record_item_amount, assets_record_item.income_type as _assets_record_item_income_type
+    </sql>
+</mapper>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.autoask.mapper.MerchantShareApplyMapper">
+    <resultMap id="merchant_share_apply_map" type="com.autoask.entity.mysql.MerchantShareApply">
+        <result column="_merchant_share_apply_serial_no" jdbcType="VARCHAR" property="serialNo"/>
+        <result column="_merchant_share_apply_status" jdbcType="VARCHAR" property="status"/>
+        <result column="_merchant_share_apply_batch_no" jdbcType="VARCHAR" property="batchNo"/>
+        <result column="_merchant_share_apply_merchant_type" jdbcType="VARCHAR" property="merchantType"/>
+        <result column="_merchant_share_apply_merchant_id" jdbcType="VARCHAR" property="merchantId"/>
+        <result column="_merchant_share_apply_amount" jdbcType="DECIMAL" property="amount"/>
+        <result column="_merchant_share_apply_fee" jdbcType="DECIMAL" property="fee"/>
+        <result column="_merchant_share_apply_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_merchant_share_apply_account" jdbcType="VARCHAR" property="account"/>
+        <result column="_merchant_share_apply_account_name" jdbcType="VARCHAR" property="accountName"/>
+        <result column="_merchant_share_apply_update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="_merchant_share_apply_apply_id" jdbcType="VARCHAR" property="applyId"/>
+        <result column="_merchant_share_apply_remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="_merchant_share_apply_id" jdbcType="BIGINT" property="id"/>
+    </resultMap>
+    <sql id="merchant_share_apply_fields">
+        merchant_share_apply.serial_no as _merchant_share_apply_serial_no, merchant_share_apply.status as _merchant_share_apply_status,
+        merchant_share_apply.batch_no as _merchant_share_apply_batch_no, merchant_share_apply.merchant_type as _merchant_share_apply_merchant_type,
+        merchant_share_apply.merchant_id as _merchant_share_apply_merchant_id, merchant_share_apply.amount as _merchant_share_apply_amount,
+        merchant_share_apply.fee as _merchant_share_apply_fee, merchant_share_apply.create_time as _merchant_share_apply_create_time,
+        merchant_share_apply.account as _merchant_share_apply_account, merchant_share_apply.update_time as _merchant_share_apply_update_time,
+        merchant_share_apply.apply_id as _merchant_share_apply_apply_id, merchant_share_apply.remark as _merchant_share_apply_remark,
+        merchant_share_apply.id as _merchant_share_apply_id, merchant_share_apply.account_name as _merchant_share_apply_account_name
+    </sql>
+
+    <select id="selectByParams" resultMap="merchant_share_apply_map">
+        SELECT
+        <include refid="merchant_share_apply_fields"></include>
+        FROM merchant_share_apply
+        <where>
+            <if test="applyIds != null and applyIds.size > 0">
+                apply_id IN
+                <foreach collection="applyIds" item="item" index="index" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="batchNo != null">
+                AND batch_no = #{batchNo}
+            </if>
+        </where>
+    </select>
+
+    <select id="countApplyHistoryNum" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM merchant_share_apply
+        <where>
+            <if test="merchantType != null and merchantType != ''">
+                AND merchant_type = #{merchantType}
+            </if>
+            <if test="merchantId != null and merchantId != ''">
+                AND merchant_id = #{merchantId}
+            </if>
+            <if test="startTime != null">
+                AND create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND create_time &lt; #{endTime}
+            </if>
+            <if test="status != null and status !=''">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectApplyHistory" resultMap="merchant_share_apply_map">
+        SELECT
+        <include refid="merchant_share_apply_fields"></include>
+        FROM merchant_share_apply
+        <where>
+            <if test="merchantType != null and merchantType != ''">
+                AND merchant_type = #{merchantType}
+            </if>
+            <if test="merchantId != null and merchantId != ''">
+                AND merchant_id = #{merchantId}
+            </if>
+            <if test="startTime != null">
+                AND create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND create_time &lt; #{endTime}
+            </if>
+            <if test="status != null and status !=''">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+        LIMIT #{start},#{limit};
+    </select>
+
+    <select id="countApplyNum" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM merchant_share_apply
+        <where>
+            <if test="merchantType != null and merchantType != ''">
+                AND merchant_type = #{merchantType}
+            </if>
+            <if test="merchantId != null and merchantId != ''">
+                AND merchant_id = #{merchantId}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateShareDoingBack">
+        UPDATE merchant_share_apply
+        SET status = #{applyingStatus}
+        WHERE update_time &gt; #{startTime} AND update_time &lt; #{endTime} AND merchant_share_apply.status = #{doingStatus}
+    </update>
+</mapper>

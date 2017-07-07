@@ -1,0 +1,97 @@
+package com.autoask.common.util;
+
+import com.autoask.common.exception.ApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * 类型转换公共类
+ * 
+ * @author licheng
+ *
+ */
+public class TypeConvertUtil {
+
+	private static final Logger LOG = LoggerFactory.getLogger(TypeConvertUtil.class);
+
+	/**
+	 * 讲字符串变量转换成 Double
+	 * 
+	 * @param paramName
+	 *            参数名称
+	 * @param param
+	 *            参数字符串
+	 * @param throwException
+	 *            是否抛异常，如果为true就抛异常，为false不抛异常
+	 * @return 返回Double类型值
+	 */
+	public static Double convertToDouble(String paramName, String param, boolean throwException) throws ApiException {
+		try {
+			return Double.valueOf(param);
+		} catch (NumberFormatException e) {
+			LOG.warn("Parameter {} is not Double type, which value is {}", paramName, param);
+			if (throwException) {
+				LOG.warn(e.getMessage(), e);
+				throw new ApiException("参数错误");
+			}
+		}
+		return 0D;
+	}
+
+	/**
+	 * 讲字符串变量转换成 Long
+	 * 
+	 * @param paramName
+	 *            参数名称
+	 * @param param
+	 *            参数字符串
+	 * @param throwException
+	 *            是否抛异常，如果为true就抛异常，为false不抛异常
+	 * @return 返回Double类型值
+	 */
+	public static Long convertToLong(String paramName, String param, boolean throwException) throws ApiException {
+		try {
+			return Long.valueOf(param);
+		} catch (NumberFormatException e) {
+			LOG.warn("Parameter {} is not Long type, which value is {}", paramName, param);
+			if (throwException) {
+				LOG.warn(e.getMessage(), e);
+				throw new ApiException("参数错误");
+			}
+		}
+		return 0L;
+	}
+
+	/**
+	 * 讲字符串变量转换成 Integer
+	 * 
+	 * @param paramName
+	 *            参数名称
+	 * @param param
+	 *            参数字符串
+	 * @param throwException
+	 *            是否抛异常，如果为true就抛异常，为false不抛异常
+	 * @return 返回Double类型值
+	 */
+	public static Integer convertToInteger(String paramName, String param, boolean throwException) throws ApiException {
+		try {
+			return Integer.valueOf(param);
+		} catch (NumberFormatException e) {
+			LOG.warn("Parameter {} is not Integer type, which value is {}", paramName, param);
+			if (throwException) {
+				LOG.warn(e.getMessage(), e);
+				throw new ApiException("参数错误");
+			}
+		}
+		return 0;
+	}
+
+	public static Boolean convertToBoolean(String paramName,String param,boolean throwException)throws ApiException {
+		try {
+			return Boolean.parseBoolean(param);
+		} catch (Exception e) {
+			LOG.warn("Parameter {} is not Integer type, which value is {}", paramName, param);
+			throw new ApiException("参数错误");
+		}
+	}
+}

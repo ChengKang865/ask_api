@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.UserMapper">
+    <resultMap id="user_map" type="com.autoask.entity.mysql.User">
+        <result column="_user_id" jdbcType="BIGINT" property="id"/>
+        <result column="_user_user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="_user_phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="_user_password" jdbcType="VARCHAR" property="password"/>
+        <result column="_user_recommend_user_id" jdbcType="VARCHAR" property="recommendUserId"/>
+        <result column="_user_recommend_phone" jdbcType="VARCHAR" property="recommendPhone"/>
+        <result column="_user_promote_id" jdbcType="VARCHAR" property="promoteId"/>
+        <result column="_user_promote_type" jdbcType="VARCHAR" property="promoteType"/>
+        <result column="_user_name" jdbcType="VARCHAR" property="name"/>
+        <result column="_user_province" jdbcType="VARCHAR" property="province"/>
+        <result column="_user_city" jdbcType="VARCHAR" property="city"/>
+        <result column="_user_region" jdbcType="VARCHAR" property="region"/>
+        <result column="_user_detail_address" jdbcType="VARCHAR" property="detailAddress"/>
+        <result column="_user_sex" jdbcType="SMALLINT" property="sex"/>
+        <result column="_user_delete_flag" jdbcType="BOOLEAN" property="deleteFlag"/>
+        <result column="_user_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_user_modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="_user_wx_open_id" jdbcType="VARCHAR" property="wxOpenId"/>
+    </resultMap>
+    <sql id="user_fields">
+        user.id as _user_id, user.user_id as _user_user_id, user.phone as _user_phone, user.password as _user_password, user.recommend_user_id as _user_recommend_user_id, user.recommend_phone as _user_recommend_phone, user.promote_id as _user_promote_id, user.promote_type as _user_promote_type, user.name as _user_name, user.province as _user_province, user.city as _user_city, user.region as _user_region, user.detail_address as _user_detail_address, user.sex as _user_sex, user.delete_flag as _user_delete_flag, user.create_time as _user_create_time, user.modify_time as _user_modify_time, user.wx_open_id as _user_wx_open_id
+    </sql>
+    <sql id="user_public_fields">
+        user.detail_address as _user_detail_address, user.recommend_phone as _user_recommend_phone, user.user_id as _user_user_id, user.region as _user_region, user.province as _user_province, user.phone as _user_phone, user.promote_id as _user_promote_id, user.create_time as _user_create_time, user.name as _user_name, user.id as _user_id, user.sex as _user_sex, user.recommend_user_id as _user_recommend_user_id, user.city as _user_city, user.modify_time as _user_modify_time, user.promote_type as _user_promote_type
+    </sql>
+
+    <select id="countUserNum" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM user
+        <where>
+            <if test="phone != null and phone != ''">
+                AND phone = #{phone}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND create_time &lt; #{endTime}
+            </if>
+        </where>
+    </select>
+    <select id="selectUserList" resultMap="user_map">
+        SELECT
+        <include refid="user_public_fields"></include>
+        FROM user
+        <where>
+            <if test="phone != null and phone != ''">
+                AND phone = #{phone}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND create_time &lt; #{endTime}
+            </if>
+        </where>
+        order by create_time desc
+        limit #{start}, #{limit}
+    </select>
+
+    <select id="getTodayRegisterNum" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM user
+        WHERE date(create_time) = current_date();
+    </select>
+    <select id="getTotalRegisterNum" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM user
+    </select>
+</mapper>

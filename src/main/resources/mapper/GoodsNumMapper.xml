@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.autoask.mapper.GoodsNumMapper">
+
+    <resultMap id="goods_num_map" type="com.autoask.entity.mysql.GoodsNum">
+        <result column="_goods_num_id" jdbcType="BIGINT" property="id"/>
+        <result column="_goods_num_goods_id" jdbcType="VARCHAR" property="goodsId"/>
+        <result column="_goods_num_merchant_type" jdbcType="VARCHAR" property="merchantType"/>
+        <result column="_goods_num_merchant_id" jdbcType="VARCHAR" property="merchantId"/>
+        <result column="_goods_num_num" jdbcType="BIGINT" property="num"/>
+        <result column="_goods_num_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_goods_num_modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <association property="goods" resultMap="com.autoask.mapper.GoodsMapper.goods_map"/>
+    </resultMap>
+
+    <sql id="goods_num_fields">
+        goods_num.id as _goods_num_id, goods_num.goods_id as _goods_num_goods_id, goods_num.merchant_type as _goods_num_merchant_type, goods_num.merchant_id as _goods_num_merchant_id, goods_num.num as _goods_num_num, goods_num.create_time as _goods_num_create_time, goods_num.modify_time as _goods_num_modify_time
+    </sql>
+
+    <select id="getGoodsNum" resultType="java.lang.Long">
+        SELECT goods_num.num
+        FROM goods_num
+        WHERE merchant_type = #{merchantType} AND merchant_id = #{merchantId} AND goods_num.goods_id = #{goodsId};
+    </select>
+
+    <update id="updateGoodsNum">
+        UPDATE goods_num
+        SET num = num + #{addNum}
+        WHERE merchant_type = #{merchantType} AND merchant_id = #{merchantId} AND goods_id = #{goodsId};
+    </update>
+
+    <select id="countGoodsNumListSize" resultType="java.lang.Long">
+        SELECT count(goods_num.id)
+        FROM goods_num
+        LEFT JOIN goods ON goods_num.goods_id = goods.goods_id
+        LEFT JOIN product ON product.product_id = goods.product_id
+        <where>
+            <if test="merchantType != null and merchantType != ''">
+                and goods_num.merchant_type = #{merchantType}
+            </if>
+            <if test="merchantIds != null and merchantIds.size() > 0">
+                and goods_num.merchant_id in
+                <foreach item="item" index="index" collection="merchantIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="goodsId != null and goodsId != ''">
+                and goods_num.goods_id = #{goodsId}
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                and goods.name LIKE CONCAT('%','${goodsName}','%' )
+            </if>
+            <if test="productId != null and productId != ''">
+                and goods.product_id = #{productId}
+            </if>
+            <if test="productCategoryId != null and productCategoryId != ''">
+                and product.product_category_id = #{productCategoryId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getGoodsNumList" resultMap="goods_num_map">
+        SELECT
+        <include refid="goods_num_fields"/>,
+        <include refid="com.autoask.mapper.GoodsMapper.goods_fields"/>,
+        <include refid="com.autoask.mapper.ProductMapper.product_fields"/>
+        FROM goods_num
+        LEFT JOIN goods ON goods_num.goods_id = goods.goods_id
+        LEFT JOIN product ON product.product_id = goods.product_id
+        <where>
+            <if test="merchantType != null and merchantType != ''">
+                and goods_num.merchant_type = #{merchantType}
+            </if>
+            <if test="merchantIds != null and merchantIds.size() > 0">
+                and goods_num.merchant_id in
+                <foreach item="item" index="index" collection="merchantIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="goodsId != null and goodsId != ''">
+                and goods_num.goods_id = #{goodsId}
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                and goods.name LIKE CONCAT('%','${goodsName}','%' )
+            </if>
+            <if test="productId != null and productId != ''">
+                and goods.product_id = #{productId}
+            </if>
+            <if test="productCategoryId != null and productCategoryId != ''">
+                and product.product_category_id = #{productCategoryId}
+            </if>
+        </where>
+        ORDER BY goods_num.modify_time DESC
+        limit #{start},#{limit}
+    </select>
+
+    <select id="getGoodsNumLackList" resultMap="goods_num_map">
+        SELECT
+        <include refid="goods_num_fields"/>,
+        <include refid="com.autoask.mapper.GoodsMapper.goods_fields"/>,
+        <include refid="com.autoask.mapper.ProductMapper.product_fields"/>
+        FROM goods_num
+        LEFT JOIN goods ON goods_num.goods_id = goods.goods_id
+        LEFT JOIN product ON product.product_id = goods.product_id
+        <where>
+            goods_num.num &lt; #{count}
+            <if test="merchantType != null and merchantType != ''">
+                and goods_num.merchant_type = #{merchantType}
+            </if>
+            <if test="merchantIds != null and merchantIds.size() > 0">
+                and goods_num.merchant_id in
+                <foreach item="item" index="index" collection="merchantIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY goods_num.modify_time DESC
+        limit #{start},#{limit}
+    </select>
+</mapper>

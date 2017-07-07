@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.OrderDeliveryMapper">
+    <resultMap id="order_delivery_map" type="com.autoask.entity.mysql.OrderDelivery">
+        <result column="_order_delivery_id" jdbcType="BIGINT" property="id"/>
+        <result column="_order_delivery_order_id" jdbcType="VARCHAR" property="orderId"/>
+        <result column="_order_delivery_merchant_type" jdbcType="VARCHAR" property="merchantType"/>
+        <result column="_order_delivery_merchant_id" jdbcType="VARCHAR" property="merchantId"/>
+        <result column="_order_delivery_pre_share" jdbcType="DECIMAL" property="preShare"/>
+        <result column="_order_delivery_receiver_name" jdbcType="VARCHAR" property="receiverName"/>
+        <result column="_order_delivery_receiver_phone" jdbcType="VARCHAR" property="receiverPhone"/>
+        <result column="_order_delivery_province" jdbcType="VARCHAR" property="province"/>
+        <result column="_order_delivery_city" jdbcType="VARCHAR" property="city"/>
+        <result column="_order_delivery_region" jdbcType="VARCHAR" property="region"/>
+        <result column="_order_delivery_street" jdbcType="VARCHAR" property="street"/>
+        <result column="_order_delivery_detail_address" jdbcType="VARCHAR" property="detailAddress"/>
+        <result column="_order_delivery_express_company" jdbcType="VARCHAR" property="expressCompany"/>
+        <result column="_order_delivery_delivery_serial" jdbcType="VARCHAR" property="deliverySerial"/>
+        <result column="_order_delivery_delivery_time" jdbcType="TIMESTAMP" property="deliveryTime"/>
+    </resultMap>
+
+    <sql id="order_delivery_fields">
+        order_delivery.id as _order_delivery_id, order_delivery.order_id as _order_delivery_order_id, order_delivery.merchant_type as _order_delivery_merchant_type, order_delivery.merchant_id as _order_delivery_merchant_id, order_delivery.pre_share as _order_delivery_pre_share, order_delivery.receiver_name as _order_delivery_receiver_name, order_delivery.receiver_phone as _order_delivery_receiver_phone, order_delivery.province as _order_delivery_province, order_delivery.city as _order_delivery_city, order_delivery.region as _order_delivery_region, order_delivery.street as _order_delivery_street, order_delivery.detail_address as _order_delivery_detail_address, order_delivery.express_company as _order_delivery_express_company, order_delivery.delivery_serial as _order_delivery_delivery_serial, order_delivery.delivery_time as _order_delivery_delivery_time
+    </sql>
+
+
+    <update id="updateOrderDeliveryMerchant">
+        UPDATE order_delivery
+        SET merchant_type = #{merchantType},merchant_id = #{merchantId}
+        WHERE order_id = #{orderId}
+    </update>
+    <update id="updateExpressInfo">
+        UPDATE order_delivery
+        SET express_company = #{expressCompany},delivery_serial = #{deliverySerial},delivery_time = current_timestamp
+        WHERE order_id = #{orderId}
+    </update>
+
+</mapper>

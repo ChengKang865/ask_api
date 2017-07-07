@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.autoask.mapper.WeiXinUserInfoMapper">
+	<resultMap id="BaseResultMap" type="com.autoask.entity.mysql.WeiXinUserInfo">
+	<id column="id" property="id" jdbcType="BIGINT" />
+    <result column="qr_code_info_id" property="qrCodeInfoId" jdbcType="VARCHAR" />
+    <result column="open_id" property="openId" jdbcType="VARCHAR" />
+    <result column="subscribe" property="subscribe" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+    <result column="sex" property="sex" jdbcType="BIGINT" />
+    <result column="country" property="country" jdbcType="VARCHAR" />
+    <result column="province" property="province" jdbcType="VARCHAR" />
+    <result column="city" property="city" jdbcType="VARCHAR" />
+    <result column="language" property="language" jdbcType="VARCHAR" />
+    <result column="head_img_url" property="headImgUrl" jdbcType="VARCHAR" />
+    <result column="delete_flag" property="deleteFlag" jdbcType="BOOLEAN" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, qr_code_info_id, open_id, subscribe, create_time, nick_name, sex, country, province, city, language, head_img_url, delete_flag
+	</sql>
+	<!-- list分页number -->
+	<select id="selectWeiXinUserInfoNum" resultType="java.lang.Long">
+		SELECT count(open_id)
+		FROM
+		wei_xin_user_info where delete_flag = 0
+		<if test="nickName != null and nickName !=''">
+			AND nick_name LIKE CONCAT('%','${nickName}','%' )
+		</if>
+	</select>
+
+	<!-- list数据 -->
+	<select id="selectWeiXinUserInfoList" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM wei_xin_user_info where 1=1
+		<if test="nickName != null and nickName != ''">
+			AND nick_name LIKE CONCAT('%','${nickName}','%' )
+		</if>
+		AND delete_flag = 0
+		order by create_time DESC limit #{start},#{limit};
+	</select>
+
+	<!-- 根据id获取数据 -->
+	<select id="selectWeiXinUserInfoById" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM wei_xin_user_info where  delete_flag = 0 AND open_id = #{openId};
+	</select>
+	
+	<!-- 取消关注 -->
+	<update id="cancelAttention">
+        UPDATE wei_xin_user_info
+        SET subscribe = 0
+        WHERE  open_id = #{openId};
+    </update>
+    
+    <!-- 重新关注 -->
+	<update id="subscribe">
+        UPDATE wei_xin_user_info
+        SET subscribe = 1
+        WHERE  open_id = #{openId};
+    </update>
+</mapper>

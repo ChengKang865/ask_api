@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.autoask.mapper.ProductMapper">
+    <resultMap id="product_map" type="com.autoask.entity.mysql.Product">
+        <result column="_product_id" jdbcType="BIGINT" property="id"/>
+        <result column="_product_product_id" jdbcType="VARCHAR" property="productId"/>
+        <result column="_product_product_category_id" jdbcType="VARCHAR" property="productCategoryId"/>
+        <result column="_product_name" jdbcType="VARCHAR" property="name"/>
+        <result column="_product_name_en" jdbcType="VARCHAR" property="nameEn"/>
+        <result column="_product_description" jdbcType="VARCHAR" property="description"/>
+        <result column="_product_logo_url" jdbcType="VARCHAR" property="logoUrl"/>
+        <result column="_product_delete_flag" jdbcType="BOOLEAN" property="deleteFlag"/>
+        <result column="_product_create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="_product_creator_id" jdbcType="VARCHAR" property="creatorId"/>
+        <result column="_product_modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="_product_modify_id" jdbcType="VARCHAR" property="modifyId"/>
+        <result column="_product_head_str" jdbcType="VARCHAR" property="headStr"/>
+    </resultMap>
+
+    <sql id="product_fields">
+        product.id as _product_id, product.product_id as _product_product_id, product.product_category_id as _product_product_category_id, product.name as _product_name, product.name_en as _product_name_en, product.description as _product_description, product.logo_url as _product_logo_url, product.delete_flag as _product_delete_flag, product.create_time as _product_create_time, product.creator_id as _product_creator_id, product.modify_time as _product_modify_time, product.modify_id as _product_modify_id, product.head_str as _product_head_str
+    </sql>
+
+    <resultMap id="price_map" type="com.autoask.entity.mysql.Product">
+        <result column="product_id" jdbcType="VARCHAR" property="productId"/>
+        <result column="price_str" jdbcType="VARCHAR" property="priceStr"/>
+    </resultMap>
+
+    <select id="selectByMap" parameterType="map" resultMap="product_map">
+        SELECT
+        <include refid="product_fields"></include>
+        FROM product
+        <where>
+            product.delete_flag = FALSE
+            <if test="product != null">
+                <if test="product.name != null">
+                    and product.name = #{product.name}
+                </if>
+            </if>
+            <if test="productCategoryId != null">
+                and product.product_category_id = #{productCategoryId}
+            </if>
+        </where>
+    </select>
+
+    <select id="searchProductList" resultMap="product_map">
+        SELECT
+        <include refid="product_fields"></include>
+        FROM product
+        WHERE name LIKE CONCAT('%','${content}','%' )
+    </select>
+
+    <select id="getProductPriceStr" resultType="java.lang.String">
+        SELECT group_concat(DISTINCT goods.online_price ORDER BY goods.online_price ASC SEPARATOR '/') AS price_str
+        FROM goods
+        WHERE goods.product_id = #{productId} AND goods.delete_flag = 0 AND goods.sale_flag = 1
+        GROUP BY product_id;
+    </select>
+
+    <select id="getProductListPriceStr" resultMap="price_map">
+        SELECT goods.product_id,group_concat(DISTINCT goods.online_price ORDER BY goods.online_price ASC SEPARATOR '/')
+        AS price_str
+        FROM goods
+        WHERE goods.product_id IN
+        <foreach item="item" index="index" collection="productIdList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND goods.delete_flag = 0 AND goods.sale_flag = 1
+        GROUP BY product_id;
+    </select>
+
+    <select id="getProductCategoryList" resultMap="com.autoask.mapper.ProductCategoryMapper.product_category_map">
+        SELECT
+        <include refid="com.autoask.mapper.ProductCategoryMapper.product_category_fields"/>
+        FROM product_category
+        WHERE product_category_id in (
+        SELECT product_category_id
+        FROM product
+        LEFT JOIN goods ON goods.product_id = product.product_id
+        WHERE goods.goods_id IN
+        <foreach item="item" index="index" collection="goodsIdList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        );
+    </select>
+</mapper>
